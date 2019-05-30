@@ -92,11 +92,11 @@ const handleSingleVariableFor = (variableDescriptor, value) =>
       return
     }
 
-    value = maybePromoteScalarValueIntoResponsive(value)
-
     value = variableDescriptor.extractValue
       ? variableDescriptor.extractValue(value)
       : value
+
+    value = maybePromoteScalarValueIntoResponsive(value)
 
     if (variableDescriptor.respect_visibility) {
       if (!wp.customize(variableDescriptor.respect_visibility)().mobile) {
