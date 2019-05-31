@@ -89,12 +89,16 @@ const handleSingleVariableFor = (variableDescriptor, value) =>
         `${actualValue}${variableDescriptor.unit || ''}`
       )
 
+      variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
+
       return
     }
 
     value = variableDescriptor.extractValue
       ? variableDescriptor.extractValue(value)
       : value
+
+    variableDescriptor.whenDone && variableDescriptor.whenDone(value)
 
     value = maybePromoteScalarValueIntoResponsive(value)
 
