@@ -39,8 +39,6 @@ const replaceVariableInStyleTag = (
     matchedSelector = existingCss.match(selectorRegex)
   }
 
-  console.log('here', value, variableDescriptor.variable)
-
   cssContainer.innerText = existingCss.replace(
     selectorRegex,
     matchedSelector[0].indexOf(`--${variableDescriptor.variable}:`) > -1
