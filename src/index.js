@@ -41,7 +41,8 @@ const replaceVariableInStyleTag = (
     matchedSelector[0].indexOf(`--${variableDescriptor.variable}:`) > -1
       ? matchedSelector[0].replace(
           new RegExp(`--${variableDescriptor.variable}:[\\s\\S]*?;`, 'gm'),
-          value === 'CT_CSS_SKIP_RULE'
+          value === 'CT_CSS_SKIP_RULE' ||
+          value.indexOf(variableDescriptor.variable) > -1
             ? ``
             : `--${variableDescriptor.variable}: ${value};`
         )
