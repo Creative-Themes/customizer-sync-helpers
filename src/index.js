@@ -23,7 +23,7 @@ const replaceVariableInStyleTag = (
 
   const cssContainer = document.querySelector(`#${deviceMapping[device]}`)
 
-  const existingCss = cssContainer.innerText
+  let existingCss = cssContainer.innerText
 
   const selector = variableDescriptor.selector || ':root'
 
@@ -32,9 +32,14 @@ const replaceVariableInStyleTag = (
     'gm'
   )
 
-  const matchedSelector = existingCss.match(selectorRegex)
+  let matchedSelector = existingCss.match(selectorRegex)
 
-  if (!matchedSelector) return
+  if (!matchedSelector) {
+    existingCss = `${existingCss} ${selector} {   }`
+    matchedSelector = existingCss.match(selectorRegex)
+  }
+
+  console.log('here', value, variableDescriptor.variable)
 
   cssContainer.innerText = existingCss.replace(
     selectorRegex,
