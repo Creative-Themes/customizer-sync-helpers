@@ -64,101 +64,96 @@ const replaceVariableInStyleTag = (
   )
 }
 
-const handleSingleVariableFor = (variableDescriptor, value) =>
-  [
-    ...(variableDescriptor.selector
-      ? document.querySelectorAll(variableDescriptor.selector)
-      : [document.documentElement])
-  ].map(el => {
-    if (!variableDescriptor.responsive) {
-      let actualValue =
-        (variableDescriptor.type || '').indexOf('color') > -1
-          ? value[
-              variableDescriptor.type === 'color'
-                ? 'default'
-                : variableDescriptor.type.split(':')[1]
-            ].color
-          : variableDescriptor.extractValue
-            ? variableDescriptor.extractValue(value)
-            : value
+const handleSingleVariableFor = (variableDescriptor, value) => {
+  if (!variableDescriptor.responsive) {
+    let actualValue =
+      (variableDescriptor.type || '').indexOf('color') > -1
+        ? value[
+            variableDescriptor.type === 'color'
+              ? 'default'
+              : variableDescriptor.type.split(':')[1]
+          ].color
+        : variableDescriptor.extractValue
+          ? variableDescriptor.extractValue(value)
+          : value
 
-      if ((variableDescriptor.type || '') === 'border') {
-        actualValue =
-          value.style === 'none'
-            ? 'none'
-            : `${value.width}px ${value.style} ${value.color.color}`
-      }
-
-      replaceVariableInStyleTag(
-        variableDescriptor,
-        `${actualValue}${variableDescriptor.unit || ''}`
-      )
-
-      variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
-
-      return
-    }
-
-    value = variableDescriptor.extractValue
-      ? variableDescriptor.extractValue(value)
-      : value
-
-    variableDescriptor.whenDone && variableDescriptor.whenDone(value)
-
-    value = maybePromoteScalarValueIntoResponsive(value)
-
-    if (variableDescriptor.respect_visibility) {
-      if (!wp.customize(variableDescriptor.respect_visibility)().mobile) {
-        value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
-      }
-
-      if (!wp.customize(variableDescriptor.respect_visibility)().tablet) {
-        value.tablet = '0' + (variableDescriptor.unit ? '' : 'px')
-      }
-
-      if (!wp.customize(variableDescriptor.respect_visibility)().desktop) {
-        value.desktop = '0' + (variableDescriptor.unit ? '' : 'px')
-      }
-    }
-
-    if (variableDescriptor.respect_stacking) {
-      if (wp.customize(variableDescriptor.respect_stacking)().mobile) {
-        value.mobile =
-          parseInt(value.mobile, 10) * 2 + (variableDescriptor.unit ? '' : 'px')
-      }
-
-      if (wp.customize(variableDescriptor.respect_stacking)().tablet) {
-        value.tablet =
-          parseInt(value.tablet, 10) * 2 + (variableDescriptor.unit ? '' : 'px')
-      }
-    }
-
-    if (variableDescriptor.enabled) {
-      if (!wp.customize(variableDescriptor.enabled)() === 'no') {
-        value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
-        value.tablet = '0' + (variableDescriptor.unit ? '' : 'px')
-        value.desktop = '0' + (variableDescriptor.unit ? '' : 'px')
-      }
+    if ((variableDescriptor.type || '') === 'border') {
+      actualValue =
+        value.style === 'none'
+          ? 'none'
+          : `${value.width}px ${value.style} ${value.color.color}`
     }
 
     replaceVariableInStyleTag(
       variableDescriptor,
-      `${value.desktop}${variableDescriptor.unit || ''}`,
-      'desktop'
+      `${actualValue}${variableDescriptor.unit || ''}`
     )
 
-    replaceVariableInStyleTag(
-      variableDescriptor,
-      `${value.tablet}${variableDescriptor.unit || ''}`,
-      'tablet'
-    )
+    variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
 
-    replaceVariableInStyleTag(
-      variableDescriptor,
-      `${value.mobile}${variableDescriptor.unit || ''}`,
-      'mobile'
-    )
-  })
+    return
+  }
+
+  value = variableDescriptor.extractValue
+    ? variableDescriptor.extractValue(value)
+    : value
+
+  variableDescriptor.whenDone && variableDescriptor.whenDone(value)
+
+  value = maybePromoteScalarValueIntoResponsive(value)
+
+  if (variableDescriptor.respect_visibility) {
+    if (!wp.customize(variableDescriptor.respect_visibility)().mobile) {
+      value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
+    }
+
+    if (!wp.customize(variableDescriptor.respect_visibility)().tablet) {
+      value.tablet = '0' + (variableDescriptor.unit ? '' : 'px')
+    }
+
+    if (!wp.customize(variableDescriptor.respect_visibility)().desktop) {
+      value.desktop = '0' + (variableDescriptor.unit ? '' : 'px')
+    }
+  }
+
+  if (variableDescriptor.respect_stacking) {
+    if (wp.customize(variableDescriptor.respect_stacking)().mobile) {
+      value.mobile =
+        parseInt(value.mobile, 10) * 2 + (variableDescriptor.unit ? '' : 'px')
+    }
+
+    if (wp.customize(variableDescriptor.respect_stacking)().tablet) {
+      value.tablet =
+        parseInt(value.tablet, 10) * 2 + (variableDescriptor.unit ? '' : 'px')
+    }
+  }
+
+  if (variableDescriptor.enabled) {
+    if (!wp.customize(variableDescriptor.enabled)() === 'no') {
+      value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
+      value.tablet = '0' + (variableDescriptor.unit ? '' : 'px')
+      value.desktop = '0' + (variableDescriptor.unit ? '' : 'px')
+    }
+  }
+
+  replaceVariableInStyleTag(
+    variableDescriptor,
+    `${value.desktop}${variableDescriptor.unit || ''}`,
+    'desktop'
+  )
+
+  replaceVariableInStyleTag(
+    variableDescriptor,
+    `${value.tablet}${variableDescriptor.unit || ''}`,
+    'tablet'
+  )
+
+  replaceVariableInStyleTag(
+    variableDescriptor,
+    `${value.mobile}${variableDescriptor.unit || ''}`,
+    'mobile'
+  )
+}
 
 export const handleVariablesFor = variables =>
   wp.customize.bind(
