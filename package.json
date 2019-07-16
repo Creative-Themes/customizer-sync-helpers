@@ -13,8 +13,6 @@
     "npm": ">=5"
   },
   "scripts": {
-    "test": "cross-env CI=1 react-scripts test --env=jsdom",
-    "test:watch": "react-scripts test --env=jsdom",
     "build": "rollup -c",
     "start": "rollup -c -w",
     "prepare": "yarn run build"
@@ -27,15 +25,6 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "cross-env": "^5.1.4",
-    "eslint": "^5.0.1",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-config-standard-react": "^6.0.0",
-    "eslint-plugin-import": "^2.13.0",
-    "eslint-plugin-node": "^7.0.1",
-    "eslint-plugin-promise": "^4.0.0",
-    "eslint-plugin-react": "^7.10.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "react-scripts": "^1.1.4",
     "rollup": "^0.64.1",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-commonjs": "^9.1.3",
