@@ -1,3 +1,4 @@
+import { prepareSpacingValueFor } from './spacing'
 export const maybePromoteScalarValueIntoResponsive = value =>
   /**
    * Responsive value must necessarily have the desktop key attached to it
@@ -84,12 +85,7 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
   }
 
   if ((variableDescriptor.type || '') === 'spacing') {
-    const { property = 'margin' } = variableDescriptor
-
-    actualValue =
-      value.style === 'none'
-        ? 'none'
-        : `${value.width}px ${value.style} ${value.color.color}`
+    actualValue = prepareSpacingValueFor(value)
   }
 
   replaceVariableInStyleTag(
