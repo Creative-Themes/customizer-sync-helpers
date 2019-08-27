@@ -89,7 +89,7 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
     device
   )
 
-  variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
+  variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue, value)
 }
 
 export const handleSingleVariableFor = (variableDescriptor, value) => {
@@ -98,11 +98,13 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
     return
   }
 
+  const fullValue = value
+
   value = variableDescriptor.extractValue
     ? variableDescriptor.extractValue(value)
     : value
 
-  variableDescriptor.whenDone && variableDescriptor.whenDone(value)
+  variableDescriptor.whenDone && variableDescriptor.whenDone(value, fullValue)
 
   value = maybePromoteScalarValueIntoResponsive(value)
 
