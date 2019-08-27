@@ -64,33 +64,36 @@ const replaceVariableInStyleTag = (
   )
 }
 
-const handleSingleVariableFor = (variableDescriptor, value) => {
+const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
+  let actualValue =
+    (variableDescriptor.type || '').indexOf('color') > -1
+      ? value[
+          variableDescriptor.type === 'color'
+            ? 'default'
+            : variableDescriptor.type.split(':')[1]
+        ].color
+      : variableDescriptor.extractValue
+        ? variableDescriptor.extractValue(value)
+        : value
+
+  if ((variableDescriptor.type || '') === 'border') {
+    actualValue =
+      value.style === 'none'
+        ? 'none'
+        : `${value.width}px ${value.style} ${value.color.color}`
+  }
+
+  replaceVariableInStyleTag(
+    variableDescriptor,
+    `${actualValue}${variableDescriptor.unit || ''}`
+  )
+
+  variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
+}
+
+export const handleSingleVariableFor = (variableDescriptor, value) => {
   if (!variableDescriptor.responsive) {
-    let actualValue =
-      (variableDescriptor.type || '').indexOf('color') > -1
-        ? value[
-            variableDescriptor.type === 'color'
-              ? 'default'
-              : variableDescriptor.type.split(':')[1]
-          ].color
-        : variableDescriptor.extractValue
-          ? variableDescriptor.extractValue(value)
-          : value
-
-    if ((variableDescriptor.type || '') === 'border') {
-      actualValue =
-        value.style === 'none'
-          ? 'none'
-          : `${value.width}px ${value.style} ${value.color.color}`
-    }
-
-    replaceVariableInStyleTag(
-      variableDescriptor,
-      `${actualValue}${variableDescriptor.unit || ''}`
-    )
-
-    variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
-
+    replacingLogic(variableDescriptor, value)
     return
   }
 
@@ -102,32 +105,6 @@ const handleSingleVariableFor = (variableDescriptor, value) => {
 
   value = maybePromoteScalarValueIntoResponsive(value)
 
-  if (variableDescriptor.respect_visibility) {
-    if (!wp.customize(variableDescriptor.respect_visibility)().mobile) {
-      value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
-    }
-
-    if (!wp.customize(variableDescriptor.respect_visibility)().tablet) {
-      value.tablet = '0' + (variableDescriptor.unit ? '' : 'px')
-    }
-
-    if (!wp.customize(variableDescriptor.respect_visibility)().desktop) {
-      value.desktop = '0' + (variableDescriptor.unit ? '' : 'px')
-    }
-  }
-
-  if (variableDescriptor.respect_stacking) {
-    if (wp.customize(variableDescriptor.respect_stacking)().mobile) {
-      value.mobile =
-        parseInt(value.mobile, 10) * 2 + (variableDescriptor.unit ? '' : 'px')
-    }
-
-    if (wp.customize(variableDescriptor.respect_stacking)().tablet) {
-      value.tablet =
-        parseInt(value.tablet, 10) * 2 + (variableDescriptor.unit ? '' : 'px')
-    }
-  }
-
   if (variableDescriptor.enabled) {
     if (!wp.customize(variableDescriptor.enabled)() === 'no') {
       value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
@@ -136,23 +113,9 @@ const handleSingleVariableFor = (variableDescriptor, value) => {
     }
   }
 
-  replaceVariableInStyleTag(
-    variableDescriptor,
-    `${value.desktop}${variableDescriptor.unit || ''}`,
-    'desktop'
-  )
-
-  replaceVariableInStyleTag(
-    variableDescriptor,
-    `${value.tablet}${variableDescriptor.unit || ''}`,
-    'tablet'
-  )
-
-  replaceVariableInStyleTag(
-    variableDescriptor,
-    `${value.mobile}${variableDescriptor.unit || ''}`,
-    'mobile'
-  )
+  replacingLogic(variableDescriptor, value.desktop, 'desktop')
+  replacingLogic(variableDescriptor, value.tablet, 'tablet')
+  replacingLogic(variableDescriptor, value.mobile, 'mobile')
 }
 
 export const handleVariablesFor = variables =>
