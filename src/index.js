@@ -72,11 +72,20 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
             ? 'default'
             : variableDescriptor.type.split(':')[1]
         ].color
-      : variableDescriptor.extractValue
+      : variableDescriptor.extractValue && !variableDescriptor.responsive
         ? variableDescriptor.extractValue(value)
         : value
 
   if ((variableDescriptor.type || '') === 'border') {
+    actualValue =
+      value.style === 'none'
+        ? 'none'
+        : `${value.width}px ${value.style} ${value.color.color}`
+  }
+
+  if ((variableDescriptor.type || '') === 'spacing') {
+    const { property = 'margin' } = variableDescriptor
+
     actualValue =
       value.style === 'none'
         ? 'none'
