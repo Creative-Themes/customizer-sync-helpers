@@ -85,7 +85,8 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
 
   replaceVariableInStyleTag(
     variableDescriptor,
-    `${actualValue}${variableDescriptor.unit || ''}`
+    `${actualValue}${variableDescriptor.unit || ''}`,
+    device
   )
 
   variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue)
