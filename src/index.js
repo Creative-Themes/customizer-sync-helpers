@@ -1,4 +1,6 @@
 import { prepareSpacingValueFor } from './spacing'
+import { prepareBoxShadowValueFor } from './boxShadow'
+
 export const maybePromoteScalarValueIntoResponsive = value =>
   /**
    * Responsive value must necessarily have the desktop key attached to it
@@ -86,6 +88,10 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
 
   if ((variableDescriptor.type || '') === 'spacing') {
     actualValue = prepareSpacingValueFor(value)
+  }
+
+  if ((variableDescriptor.type || '') === 'box-shadow') {
+    actualValue = prepareBoxShadowValueFor(value)
   }
 
   replaceVariableInStyleTag(
