@@ -58,7 +58,7 @@ const replaceVariableInStyleTag = (
             'gm'
           ),
           `${selector} {${
-            value.indexOf('CT_CSS_SKIP_RULE') ||
+            value.indexOf('CT_CSS_SKIP_RULE') > -1 ||
             value.indexOf(variableDescriptor.variable) > -1
               ? ``
               : `--${variableDescriptor.variable}: ${value};`
