@@ -1,4 +1,5 @@
 import { prepareSpacingValueFor } from './spacing'
+
 import { prepareBoxShadowValueFor } from './boxShadow'
 
 export const maybePromoteScalarValueIntoResponsive = value =>
@@ -27,15 +28,29 @@ const replaceVariableInStyleTag = (
   const cssContainer = document.querySelector(`#${deviceMapping[device]}`)
 
   let existingCss = cssContainer.innerText
-
   const selector = variableDescriptor.selector || ':root'
 
-  const selectorRegex = new RegExp(
-    `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{[\\s\\S]*?}`,
-    'gm'
-  )
-
+  let selectorRegex = null
   let matchedSelector = existingCss.match(selectorRegex)
+
+  if (existingCss.trim().indexOf(selectorRegex) === 0) {
+    selectorRegex = new RegExp(
+      `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{[\\s\\S]*?}`,
+      'gm'
+    )
+
+    matchedSelector = existingCss.match(selectorRegex)
+  } else {
+    selectorRegex = new RegExp(
+      `\\}\\s*?${selector.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        '\\$&'
+      )}\\s?{[\\s\\S]*?}`,
+      'gm'
+    )
+
+    matchedSelector = existingCss.match(selectorRegex)
+  }
 
   if (!matchedSelector) {
     existingCss = `${existingCss} ${selector} {   }`
