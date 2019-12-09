@@ -2,17 +2,31 @@ import { prepareSpacingValueFor } from './spacing'
 
 import { prepareBoxShadowValueFor } from './boxShadow'
 
-export const maybePromoteScalarValueIntoResponsive = value =>
+export const maybePromoteScalarValueIntoResponsive = (
+  value,
+  isResponsive = true
+) => {
   /**
    * Responsive value must necessarily have the desktop key attached to it
    */
-  value.desktop
-    ? value
-    : {
-        desktop: value,
-        tablet: value,
-        mobile: value
-      }
+  if (value.desktop) {
+    if (!isResponsive) {
+      return value.desktop
+    }
+
+    return value
+  }
+
+  if (!isResponsive) {
+    return value
+  }
+
+  return {
+    desktop: value,
+    tablet: value,
+    mobile: value
+  }
+}
 
 const replaceVariableInStyleTag = (
   variableDescriptor,
@@ -63,7 +77,7 @@ const replaceVariableInStyleTag = (
       ? matchedSelector[0].replace(
           new RegExp(`--${variableDescriptor.variable}:[\\s\\S]*?;`, 'gm'),
           value.indexOf('CT_CSS_SKIP_RULE') > -1 ||
-          value.indexOf(variableDescriptor.variable) > -1
+            value.indexOf(variableDescriptor.variable) > -1
             ? ``
             : `--${variableDescriptor.variable}: ${value};`
         )
@@ -91,8 +105,8 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
             : variableDescriptor.type.split(':')[1]
         ].color
       : variableDescriptor.extractValue && !variableDescriptor.responsive
-        ? variableDescriptor.extractValue(value)
-        : value
+      ? variableDescriptor.extractValue(value)
+      : value
 
   if ((variableDescriptor.type || '') === 'border') {
     actualValue =
@@ -121,11 +135,6 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
 }
 
 export const handleSingleVariableFor = (variableDescriptor, value) => {
-  if (!variableDescriptor.responsive) {
-    replacingLogic(variableDescriptor, value)
-    return
-  }
-
   const fullValue = value
 
   value = variableDescriptor.extractValue
@@ -134,7 +143,15 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
 
   variableDescriptor.whenDone && variableDescriptor.whenDone(value, fullValue)
 
-  value = maybePromoteScalarValueIntoResponsive(value)
+  value = maybePromoteScalarValueIntoResponsive(
+    value,
+    variableDescriptor.responsive
+  )
+
+  if (!variableDescriptor.responsive) {
+    replacingLogic(variableDescriptor, value)
+    return
+  }
 
   if (variableDescriptor.enabled) {
     if (!wp.customize(variableDescriptor.enabled)() === 'no') {
