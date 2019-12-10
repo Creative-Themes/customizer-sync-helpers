@@ -145,7 +145,7 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
 
   value = maybePromoteScalarValueIntoResponsive(
     value,
-    variableDescriptor.responsive
+    !!variableDescriptor.responsive
   )
 
   if (!variableDescriptor.responsive) {
