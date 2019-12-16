@@ -104,8 +104,6 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
             ? 'default'
             : variableDescriptor.type.split(':')[1]
         ].color
-      : variableDescriptor.extractValue && !variableDescriptor.responsive
-      ? variableDescriptor.extractValue(value)
       : value
 
   if ((variableDescriptor.type || '') === 'border') {
