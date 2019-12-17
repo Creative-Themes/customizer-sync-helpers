@@ -128,8 +128,6 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
     }`,
     device
   )
-
-  variableDescriptor.whenDone && variableDescriptor.whenDone(actualValue, value)
 }
 
 export const handleSingleVariableFor = (variableDescriptor, value) => {
