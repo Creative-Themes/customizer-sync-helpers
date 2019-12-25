@@ -1,32 +1,6 @@
 import { prepareSpacingValueFor } from './spacing'
-
+import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive'
 import { prepareBoxShadowValueFor } from './boxShadow'
-
-export const maybePromoteScalarValueIntoResponsive = (
-  value,
-  isResponsive = true
-) => {
-  /**
-   * Responsive value must necessarily have the desktop key attached to it
-   */
-  if (value.desktop) {
-    if (!isResponsive) {
-      return value.desktop
-    }
-
-    return value
-  }
-
-  if (!isResponsive) {
-    return value
-  }
-
-  return {
-    desktop: value,
-    tablet: value,
-    mobile: value
-  }
-}
 
 const replaceVariableInStyleTag = (
   variableDescriptor,

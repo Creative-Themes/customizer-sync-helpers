@@ -64,5 +64,34 @@ export default [
       resolve(),
       commonjs()
     ]
+  },
+
+  {
+    input: 'src/promote-into-responsive.js',
+    output: [
+      {
+        file: 'dist/promote-into-responsive.js',
+        format: 'cjs',
+        sourcemap: true
+      },
+
+      {
+        file: 'dist/promote-into-responsive.es.js',
+        format: 'es',
+        sourcemap: true
+      }
+    ],
+    plugins: [
+      external(),
+      postcss({
+        modules: true
+      }),
+      url(),
+      babel({
+        exclude: 'node_modules/**'
+      }),
+      resolve(),
+      commonjs()
+    ]
   }
 ]
