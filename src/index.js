@@ -21,7 +21,7 @@ const replaceVariableInStyleTag = (
   let selectorRegex = null
   let matchedSelector = existingCss.match(selectorRegex)
 
-  if (existingCss.trim().indexOf(selectorRegex) === 0) {
+  if (existingCss.trim().indexOf(selector) === 0) {
     selectorRegex = new RegExp(
       `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{[\\s\\S]*?}`,
       'gm'
@@ -42,7 +42,25 @@ const replaceVariableInStyleTag = (
 
   if (!matchedSelector) {
     existingCss = `${existingCss} ${selector} {   }`
-    matchedSelector = existingCss.match(selectorRegex)
+
+    if (existingCss.trim().indexOf(selector) === 0) {
+      selectorRegex = new RegExp(
+        `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{[\\s\\S]*?}`,
+        'gm'
+      )
+
+      matchedSelector = existingCss.match(selectorRegex)
+    } else {
+      selectorRegex = new RegExp(
+        `\\}\\s*?${selector.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          '\\$&'
+        )}\\s?{[\\s\\S]*?}`,
+        'gm'
+      )
+
+      matchedSelector = existingCss.match(selectorRegex)
+    }
   }
 
   cssContainer.innerText = existingCss.replace(
