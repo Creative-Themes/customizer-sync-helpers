@@ -13,7 +13,7 @@ const replaceVariableInStyleTag = (
     mobile: 'ct-main-styles-mobile-inline-css'
   }
 
-  const cssContainer = document.querySelector(`#${deviceMapping[device]}`)
+  const cssContainer = document.querySelector(`style#${deviceMapping[device]}`)
 
   let existingCss = cssContainer.innerText
   const selector = variableDescriptor.selector || ':root'
