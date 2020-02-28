@@ -7,7 +7,7 @@ export const prepareSpacingValueFor = value => {
           : !(
               currentValue !== 'auto' &&
               currentValue &&
-              currentValue.match(/\d/g)
+              currentValue.toString().match(/\d/g)
             ),
       true
     )
@@ -16,17 +16,21 @@ export const prepareSpacingValueFor = value => {
   }
 
   const result = [
-    value['top'] === 'auto' || !value['top'].match(/\d/g) ? 0 : value['top'],
+    value['top'] === 'auto' || !value['top'].toString().match(/\d/g)
+      ? 0
+      : value['top'],
 
-    value['right'] === 'auto' || !value['right'].match(/\d/g)
+    value['right'] === 'auto' || !value['right'].toString().match(/\d/g)
       ? 0
       : value['right'],
 
-    value['bottom'] === 'auto' || !value['bottom'].match(/\d/g)
+    value['bottom'] === 'auto' || !value['bottom'].toString().match(/\d/g)
       ? 0
       : value['bottom'],
 
-    value['left'] === 'auto' || !value['left'].match(/\d/g) ? 0 : value['left']
+    value['left'] === 'auto' || !value['left'].toString().match(/\d/g)
+      ? 0
+      : value['left']
   ]
 
   if (
