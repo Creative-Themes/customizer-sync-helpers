@@ -110,7 +110,7 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
   }
 
   if ((variableDescriptor.type || '') === 'box-shadow') {
-    actualValue = prepareBoxShadowValueFor(value)
+    actualValue = prepareBoxShadowValueFor(value, variableDescriptor)
   }
 
   replaceVariableInStyleTag(

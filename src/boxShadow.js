@@ -1,6 +1,14 @@
-export const prepareBoxShadowValueFor = value => {
-  if (!value.enable) {
+export const prepareBoxShadowValueFor = (value, { forcedOutput = false }) => {
+  if (value === 'CT_CSS_SKIP_RULE') {
     return 'CT_CSS_SKIP_RULE'
+  }
+
+  if (value === 'none') {
+    return 'none'
+  }
+
+  if (!value.enable) {
+    return forcedOutput ? 'none' : 'CT_CSS_SKIP_RULE'
   }
 
   if (
