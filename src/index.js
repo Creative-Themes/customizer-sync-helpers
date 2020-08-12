@@ -16,7 +16,11 @@ const replaceVariableInStyleTag = (
   const cssContainer = document.querySelector(`style#${deviceMapping[device]}`)
 
   let existingCss = cssContainer.innerText
-  const selector = variableDescriptor.selector || ':root'
+  const selector = `${
+    variableDescriptor[`${device}_selector_prefix`]
+      ? `${variableDescriptor[`${device}_selector_prefix`]} `
+      : ''
+  }${variableDescriptor.selector || ':root'}`
 
   let selectorRegex = null
   let matchedSelector = existingCss.match(selectorRegex)

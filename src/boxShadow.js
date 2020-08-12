@@ -17,7 +17,7 @@ export const prepareBoxShadowValueFor = (value, { forcedOutput = false }) => {
     parseFloat(value.v_offset) === 0 &&
     parseFloat(value.h_offset) === 0
   ) {
-    return 'CT_CSS_SKIP_RULE'
+    return forcedOutput ? 'none' : 'CT_CSS_SKIP_RULE'
   }
 
   const box_shadow_components = []
