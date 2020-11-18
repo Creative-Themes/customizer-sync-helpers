@@ -104,7 +104,7 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
 
   if ((variableDescriptor.type || '') === 'border') {
     actualValue =
-      value.style === 'none'
+      !value || value.style === 'none'
         ? 'none'
         : `${value.width}px ${value.style} ${value.color.color}`
   }
