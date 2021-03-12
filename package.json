@@ -1,6 +1,6 @@
 {
   "name": "customizer-sync-helpers",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "description": "Helpers for syncing customizer controls",
   "author": "andreiglingeanu",
   "license": "MIT",
@@ -21,6 +21,7 @@
     "@babel/core": "^7.5.4",
     "@babel/preset-env": "^7.5.4",
     "cross-env": "^5.1.4",
+    "prettier": "^2.2.1",
     "rollup": "^1.17.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.0.1",
