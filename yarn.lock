@@ -2665,6 +2665,11 @@ set-value@^2.0.0:
     is-plain-object "^2.0.3"
     split-string "^3.0.1"
 
+shady-css-parser@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/shady-css-parser/-/shady-css-parser-0.1.0.tgz#534dc79c8ca5884c5ed92a4e5a13d6d863bca428"
+  integrity sha512-irfJUUkEuDlNHKZNAp2r7zOyMlmbfVJ+kWSfjlCYYUx/7dJnANLCyTzQZsuxy5NJkvtNwSxY5Gj8MOlqXUQPyA==
+
 shebang-command@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/shebang-command/-/shebang-command-1.2.0.tgz#44aac65b695b03398968c39f363fee5deafdf1ea"

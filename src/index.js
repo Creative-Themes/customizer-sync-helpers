@@ -1,98 +1,97 @@
 import { prepareSpacingValueFor } from './spacing'
 import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive'
 import { prepareBoxShadowValueFor } from './boxShadow'
+import * as shadyCss from 'shady-css-parser'
+
+const deviceMapping = {
+  desktop: 'ct-main-styles-inline-css',
+  tablet: 'ct-main-styles-tablet-inline-css',
+  mobile: 'ct-main-styles-mobile-inline-css',
+}
+
+const cssParsedIndex = {
+  desktop: { ast: {} },
+  tablet: { ast: {} },
+  mobile: { ast: {} },
+}
 
 const replaceVariableInStyleTag = (
   variableDescriptor,
   value,
   device = 'desktop'
 ) => {
-  const deviceMapping = {
-    desktop: 'ct-main-styles-inline-css',
-    tablet: 'ct-main-styles-tablet-inline-css',
-    mobile: 'ct-main-styles-mobile-inline-css'
-  }
-
-  const cssContainer = document.querySelector(`style#${deviceMapping[device]}`)
-
-  let existingCss = cssContainer.innerText
-  const selector = `${
+  const newSelector = `${
     variableDescriptor[`${device}_selector_prefix`]
       ? `${variableDescriptor[`${device}_selector_prefix`]} `
       : ''
   }${variableDescriptor.selector || ':root'}`
 
-  let selectorRegex = null
-  let matchedSelector = existingCss.match(selectorRegex)
+  let variableName = `--${variableDescriptor.variable}`
 
-  if (existingCss.trim().indexOf(selector) === 0) {
-    selectorRegex = new RegExp(
-      `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{[\\s\\S]*?}`,
-      'gm'
-    )
+  const newAst = {
+    ...cssParsedIndex[device].ast,
 
-    matchedSelector = existingCss.match(selectorRegex)
-  } else {
-    selectorRegex = new RegExp(
-      `\\}\\s*?${selector.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        '\\$&'
-      )}\\s?{[\\s\\S]*?}`,
-      'gm'
-    )
+    rules: cssParsedIndex[device].ast.rules.map((rule) => {
+      let { selector } = rule
 
-    matchedSelector = existingCss.match(selectorRegex)
+      if (selector !== newSelector) {
+        return rule
+      }
+
+      if (
+        value.indexOf('CT_CSS_SKIP_RULE' || value.indexOf(variableName) > -1) >
+        -1
+      ) {
+        return {
+          ...rule,
+          rulelist: {
+            ...rule.rulelist,
+            rules: rule.rulelist.rules.filter(
+              ({ name }) => name !== variableName
+            ),
+          },
+        }
+      }
+
+      return {
+        ...rule,
+        rulelist: {
+          ...rule.rulelist,
+          rules: rule.rulelist.rules.map((rule) => {
+            if (rule.name === variableName) {
+              return {
+                ...rule,
+                value: {
+                  ...rule.value,
+                  text: value,
+                },
+              }
+            }
+
+            return rule
+          }),
+        },
+      }
+    }),
   }
 
-  if (!matchedSelector) {
-    existingCss = `${existingCss} ${selector} {   }`
+  const stringifier = new shadyCss.Stringifier()
 
-    if (existingCss.trim().indexOf(selector) === 0) {
-      selectorRegex = new RegExp(
-        `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{[\\s\\S]*?}`,
-        'gm'
-      )
+  cssParsedIndex[device].ast = newAst
 
-      matchedSelector = existingCss.match(selectorRegex)
-    } else {
-      selectorRegex = new RegExp(
-        `\\}\\s*?${selector.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          '\\$&'
-        )}\\s?{[\\s\\S]*?}`,
-        'gm'
-      )
-
-      matchedSelector = existingCss.match(selectorRegex)
-    }
-  }
-
-  cssContainer.innerText = existingCss.replace(
-    selectorRegex,
-    matchedSelector[0].indexOf(`--${variableDescriptor.variable}:`) > -1
-      ? matchedSelector[0].replace(
-          new RegExp(`--${variableDescriptor.variable}:[\\s\\S]*?;`, 'gm'),
-          value.indexOf('CT_CSS_SKIP_RULE') > -1 ||
-            value.indexOf(variableDescriptor.variable) > -1
-            ? ``
-            : `--${variableDescriptor.variable}: ${value};`
-        )
-      : matchedSelector[0].replace(
-          new RegExp(
-            `${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s?{`,
-            'gm'
-          ),
-          `${selector} {${
-            value.indexOf('CT_CSS_SKIP_RULE') > -1 ||
-            value.indexOf(variableDescriptor.variable) > -1
-              ? ``
-              : `--${variableDescriptor.variable}: ${value};`
-          }`
-        )
-  )
+  document.querySelector(
+    `style#${deviceMapping[device]}`
+  ).innerText = stringifier.stringify(newAst)
 }
 
-const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
+const replacingLogic = (args = {}) => {
+  const {
+    variableDescriptor,
+    value,
+    device = 'desktop',
+    customReplaceVariableInStyleTag = null,
+  } = args
+
   let actualValue =
     (variableDescriptor.type || '').indexOf('color') > -1
       ? value[
@@ -117,16 +116,31 @@ const replacingLogic = (variableDescriptor, value, device = 'desktop') => {
     actualValue = prepareBoxShadowValueFor(value, variableDescriptor)
   }
 
-  replaceVariableInStyleTag(
-    variableDescriptor,
-    `${actualValue}${variableDescriptor.unit || ''}${
-      variableDescriptor.important ? ' !important' : ''
-    }`,
-    device
-  )
+  if (customReplaceVariableInStyleTag) {
+    customReplaceVariableInStyleTag({
+      replaceVariableInStyleTag,
+      variableDescriptor,
+      value: `${actualValue}${variableDescriptor.unit || ''}${
+        variableDescriptor.important ? ' !important' : ''
+      }`,
+      device,
+    })
+  } else {
+    replaceVariableInStyleTag(
+      variableDescriptor,
+      `${actualValue}${variableDescriptor.unit || ''}${
+        variableDescriptor.important ? ' !important' : ''
+      }`,
+      device
+    )
+  }
 }
 
-export const handleSingleVariableFor = (variableDescriptor, value) => {
+export const handleSingleVariableFor = (
+  variableDescriptor,
+  value,
+  customReplaceVariableInStyleTag = null
+) => {
   const fullValue = value
 
   value = variableDescriptor.extractValue
@@ -141,7 +155,11 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
   )
 
   if (!variableDescriptor.responsive) {
-    replacingLogic(variableDescriptor, value)
+    replacingLogic({
+      variableDescriptor,
+      value,
+      customReplaceVariableInStyleTag,
+    })
     return
   }
 
@@ -153,18 +171,58 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
     }
   }
 
-  replacingLogic(variableDescriptor, value.desktop, 'desktop')
-  replacingLogic(variableDescriptor, value.tablet, 'tablet')
-  replacingLogic(variableDescriptor, value.mobile, 'mobile')
+  replacingLogic({
+    variableDescriptor,
+    value: value.desktop,
+    device: 'desktop',
+    customReplaceVariableInStyleTag,
+  })
+
+  replacingLogic({
+    variableDescriptor,
+    value: value.tablet,
+    device: 'tablet',
+    customReplaceVariableInStyleTag,
+  })
+
+  replacingLogic({
+    variableDescriptor,
+    value: value.mobile,
+    device: 'mobile',
+    customReplaceVariableInStyleTag,
+  })
 }
 
-export const handleVariablesFor = variables =>
+export const mountAstCache = () => {
+  Object.keys(deviceMapping).map((device) => {
+    const cssContainer = document.querySelector(
+      `style#${deviceMapping[device]}`
+    )
+
+    if (!cssContainer) {
+      return
+    }
+
+    let existingCss = cssContainer.innerText
+
+    const parser = new shadyCss.Parser()
+    const stringifier = new shadyCss.Stringifier()
+
+    const ast = parser.parse(existingCss)
+    cssParsedIndex[device].ast = ast
+  })
+}
+
+export const handleVariablesFor = (variables) => {
+  mountAstCache()
+
   wp.customize.bind(
     'change',
-    e =>
+    (e) =>
       variables[e.id] &&
       (Array.isArray(variables[e.id])
         ? variables[e.id]
         : [variables[e.id]]
-      ).map(d => handleSingleVariableFor(d, e()))
+      ).map((d) => handleSingleVariableFor(d, e()))
   )
+}

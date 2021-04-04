@@ -1,6 +1,6 @@
 {
   "name": "customizer-sync-helpers",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "Helpers for syncing customizer controls",
   "author": "andreiglingeanu",
   "license": "MIT",
@@ -33,5 +33,7 @@
   "files": [
     "dist"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "shady-css-parser": "^0.1.0"
+  }
 }
