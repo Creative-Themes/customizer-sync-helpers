@@ -53,23 +53,39 @@ const replaceVariableInStyleTag = (
         }
       }
 
+      let hasSuchRule = rule.rulelist.rules.find(
+        ({ name }) => name === variableName
+      )
+
       return {
         ...rule,
         rulelist: {
           ...rule.rulelist,
-          rules: rule.rulelist.rules.map((rule) => {
-            if (rule.name === variableName) {
-              return {
-                ...rule,
-                value: {
-                  ...rule.value,
-                  text: value,
-                },
-              }
-            }
+          rules: hasSuchRule
+            ? rule.rulelist.rules.map((rule) => {
+                if (rule.name === variableName) {
+                  return {
+                    ...rule,
+                    value: {
+                      ...rule.value,
+                      text: value,
+                    },
+                  }
+                }
 
-            return rule
-          }),
+                return rule
+              })
+            : [
+                ...rule.rulelist.rules,
+                {
+                  ...rule.rulelist.rules[0],
+                  name: variableName,
+                  value: {
+                    ...rule.rulelist.rules[0].value,
+                    text: value,
+                  },
+                },
+              ],
         },
       }
     }),
