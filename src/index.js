@@ -28,67 +28,98 @@ const replaceVariableInStyleTag = (
 
   let variableName = `--${variableDescriptor.variable}`
 
+  let hasSuchSelector = cssParsedIndex[device].ast.rules.find(
+    ({ selector }) => selector === newSelector
+  )
+
+  const ruleToCopy = cssParsedIndex[device].ast.rules.find(
+    ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
+  )
+
   const newAst = {
     ...cssParsedIndex[device].ast,
 
-    rules: cssParsedIndex[device].ast.rules.map((rule) => {
-      let { selector } = rule
+    rules: hasSuchSelector
+      ? cssParsedIndex[device].ast.rules.map((rule) => {
+          let { selector } = rule
 
-      if (selector !== newSelector) {
-        return rule
-      }
+          if (selector !== newSelector) {
+            return rule
+          }
 
-      if (
-        value.indexOf('CT_CSS_SKIP_RULE' || value.indexOf(variableName) > -1) >
-        -1
-      ) {
-        return {
-          ...rule,
-          rulelist: {
-            ...rule.rulelist,
-            rules: rule.rulelist.rules.filter(
-              ({ name }) => name !== variableName
-            ),
-          },
-        }
-      }
+          if (
+            value.indexOf(
+              'CT_CSS_SKIP_RULE' || value.indexOf(variableName) > -1
+            ) > -1
+          ) {
+            return {
+              ...rule,
+              rulelist: {
+                ...rule.rulelist,
+                rules: rule.rulelist.rules.filter(
+                  ({ name }) => name !== variableName
+                ),
+              },
+            }
+          }
 
-      let hasSuchRule = rule.rulelist.rules.find(
-        ({ name }) => name === variableName
-      )
+          let hasSuchRule = rule.rulelist.rules.find(
+            ({ name }) => name === variableName
+          )
 
-      return {
-        ...rule,
-        rulelist: {
-          ...rule.rulelist,
-          rules: hasSuchRule
-            ? rule.rulelist.rules.map((rule) => {
-                if (rule.name === variableName) {
-                  return {
-                    ...rule,
-                    value: {
-                      ...rule.value,
-                      text: value,
+          return {
+            ...rule,
+            rulelist: {
+              ...rule.rulelist,
+              rules: hasSuchRule
+                ? rule.rulelist.rules.map((rule) => {
+                    if (rule.name === variableName) {
+                      return {
+                        ...rule,
+                        value: {
+                          ...rule.value,
+                          text: value,
+                        },
+                      }
+                    }
+
+                    return rule
+                  })
+                : [
+                    ...rule.rulelist.rules,
+                    {
+                      ...ruleToCopy.rulelist.rules[0],
+                      name: variableName,
+                      value: {
+                        ...ruleToCopy.rulelist.rules[0].value,
+                        text: value,
+                      },
                     },
-                  }
-                }
-
-                return rule
-              })
-            : [
-                ...rule.rulelist.rules,
+                  ],
+            },
+          }
+        })
+      : [
+          ...cssParsedIndex[device].ast.rules,
+          {
+            ...ruleToCopy,
+            selector: newSelector,
+            rulelist: {
+              ...ruleToCopy.rulelist,
+              rules: [
                 {
-                  ...rule.rulelist.rules[0],
+                  ...ruleToCopy.rulelist.rules[0],
+
                   name: variableName,
                   value: {
-                    ...rule.rulelist.rules[0].value,
+                    ...ruleToCopy.rulelist.rules[0].value,
                     text: value,
                   },
                 },
               ],
-        },
-      }
-    }),
+            },
+          },
+        ],
   }
 
   const stringifier = new shadyCss.Stringifier()
