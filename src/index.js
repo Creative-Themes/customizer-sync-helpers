@@ -15,6 +15,9 @@ const cssParsedIndex = {
   mobile: { ast: {} },
 }
 
+const isFunction = (functionToCheck) =>
+  functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
+
 const replaceVariableInStyleTag = (
   variableDescriptor,
   value,
@@ -26,7 +29,11 @@ const replaceVariableInStyleTag = (
       : ''
   }${variableDescriptor.selector || ':root'}`
 
-  let variableName = `--${variableDescriptor.variable}`
+  let variableName = `--${
+    isFunction(variableDescriptor.variable)
+      ? variableDescriptor.variable()
+      : variableDescriptor.variable
+  }`
 
   let hasSuchSelector = cssParsedIndex[device].ast.rules.find(
     ({ selector }) => selector === newSelector
@@ -207,6 +214,7 @@ export const handleSingleVariableFor = (
       value,
       customReplaceVariableInStyleTag,
     })
+
     return
   }
 
