@@ -15,12 +15,12 @@ const handleSingleVariableFor = (variableDescriptor, value) =>
         ? variableDescriptor.extractValue(value)
         : value
 
-    if (actualValue.indexOf('CT_CSS_SKIP_RULE') > -1) {
+    if (actualValue && actualValue.indexOf('CT_CSS_SKIP_RULE') > -1) {
       el.style.removeProperty(`--${variableDescriptor.variable}`)
     } else {
       el.style.setProperty(
         `--${variableDescriptor.variable}`,
-        `${actualValue}${variableDescriptor.unit || ''}`
+        `${actualValue || ''}${variableDescriptor.unit || ''}`
       )
     }
   })
