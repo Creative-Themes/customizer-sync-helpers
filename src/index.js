@@ -160,6 +160,10 @@ const replacingLogic = (args = {}) => {
       !value || value.style === 'none'
         ? 'none'
         : `${value.width}px ${value.style} ${value.color.color}`
+
+    if (variableDescriptor.skip_none && actualValue === 'none') {
+      actualValue = 'CT_CSS_SKIP_RULE'
+    }
   }
 
   if ((variableDescriptor.type || '') === 'spacing') {
