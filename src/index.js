@@ -275,13 +275,21 @@ export const mountAstCache = () => {
 export const handleVariablesFor = (variables) => {
   mountAstCache()
 
-  wp.customize.bind(
-    'change',
-    (e) =>
-      variables[e.id] &&
-      (Array.isArray(variables[e.id])
-        ? variables[e.id]
-        : [variables[e.id]]
-      ).map((d) => handleSingleVariableFor(d, e()))
-  )
+  wp.customize.bind('change', (e) => {
+    if (!variables[e.id]) {
+      return
+    }
+
+    let allDescriptors = variables[e.id]
+
+    if (isFunction(allDescriptors)) {
+      allDescriptors = allDescriptors(e())
+    }
+
+    if (!Array.isArray(allDescriptors)) {
+      allDescriptors = [allDescriptors]
+    }
+
+    allDescriptors.map((d) => handleSingleVariableFor(d, e()))
+  })
 }
