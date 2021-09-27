@@ -29,7 +29,13 @@ const replaceVariableInStyleTag = (
       : ''
   }${variableDescriptor.selector || ':root'}`
 
-  let variableName = `--${
+  let variablePrefix = '--'
+
+  if (variableDescriptor.variableType === 'property') {
+    variablePrefix = ''
+  }
+
+  let variableName = `${variablePrefix}${
     isFunction(variableDescriptor.variable)
       ? variableDescriptor.variable()
       : variableDescriptor.variable
