@@ -9,22 +9,16 @@ import { getStyleTagsWithAst, persistNewAsts } from './ast'
 const isFunction = (functionToCheck) =>
   functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
 
-const replaceVariableInStyleTag = (args = {}) => {
+const replaceVariableInAst = (args = {}) => {
   args = {
     variableDescriptor: {},
     value: '',
     device: 'desktop',
+    ast: {},
     ...args,
   }
 
-  let { variableDescriptor, value, device } = args
-
-  console.log('here about to replace', {
-    variableDescriptor,
-    value,
-    device,
-    getStyleTagsWithAst: getStyleTagsWithAst(),
-  })
+  let { variableDescriptor, value, device, ast } = args
 
   const newSelector = variableDescriptor.selector || ':root'
 
@@ -40,117 +34,130 @@ const replaceVariableInStyleTag = (args = {}) => {
       : variableDescriptor.variable
   }`
 
-  persistNewAsts(
-    getStyleTagsWithAst().map((styleDescriptor) => {
-      let hasSuchSelector = styleDescriptor.ast.rules.find(
-        ({ selector }) => selector === newSelector
-      )
+  let hasSuchSelector = ast.rules.find(
+    ({ selector }) => selector === newSelector
+  )
 
-      const ruleToCopy = styleDescriptor.ast.rules.find(
-        ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
-      )
+  const ruleToCopy = ast.rules.find(
+    ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
+  )
 
-      let newAst = {
-        ...styleDescriptor.ast,
+  let newAst = {
+    ...ast,
+  }
+
+  if (hasSuchSelector) {
+    newAst.rules = newAst.rules.map((rule) => {
+      let { selector } = rule
+
+      if (selector !== newSelector) {
+        return rule
       }
 
-      if (hasSuchSelector) {
-        newAst.rules = styleDescriptor.ast.rules.map((rule) => {
-          let { selector } = rule
-
-          if (selector !== newSelector) {
-            return rule
-          }
-
-          if (
-            value.indexOf(
-              'CT_CSS_SKIP_RULE' || value.indexOf(variableName) > -1
-            ) > -1
-          ) {
-            return {
-              ...rule,
-              rulelist: {
-                ...rule.rulelist,
-                rules: rule.rulelist.rules.filter(
-                  ({ name }) => name !== variableName
-                ),
-              },
-            }
-          }
-
-          let hasSuchRule = rule.rulelist.rules.find(
-            ({ name }) => name === variableName
-          )
-
-          if (hasSuchRule) {
-            return {
-              ...rule,
-              rulelist: {
-                ...rule.rulelist,
-                rules: rule.rulelist.rules.map((rule) => {
-                  if (rule.name === variableName) {
-                    return {
-                      ...rule,
-                      value: {
-                        ...rule.value,
-                        text: value,
-                      },
-                    }
-                  }
-
-                  return rule
-                }),
-              },
-            }
-          }
-
-          return {
-            ...rule,
-            rulelist: {
-              ...rule.rulelist,
-              rules: [
-                ...rule.rulelist.rules,
-                {
-                  ...ruleToCopy.rulelist.rules[0],
-                  name: variableName,
-                  value: {
-                    ...ruleToCopy.rulelist.rules[0].value,
-                    text: value,
-                  },
-                },
-              ],
-            },
-          }
-        })
-      }
-
-      if (!hasSuchSelector) {
-        newAst.rules = [
-          ...newAst.rules,
-          {
-            ...ruleToCopy,
-            selector: newSelector,
-            rulelist: {
-              ...ruleToCopy.rulelist,
-              rules: [
-                {
-                  ...ruleToCopy.rulelist.rules[0],
-
-                  name: variableName,
-                  value: {
-                    ...ruleToCopy.rulelist.rules[0].value,
-                    text: value,
-                  },
-                },
-              ],
-            },
+      if (
+        value.indexOf('CT_CSS_SKIP_RULE' || value.indexOf(variableName) > -1) >
+        -1
+      ) {
+        return {
+          ...rule,
+          rulelist: {
+            ...rule.rulelist,
+            rules: rule.rulelist.rules.filter(
+              ({ name }) => name !== variableName
+            ),
           },
-        ]
+        }
+      }
+
+      let hasSuchRule = rule.rulelist.rules.find(
+        ({ name }) => name === variableName
+      )
+
+      if (hasSuchRule) {
+        return {
+          ...rule,
+          rulelist: {
+            ...rule.rulelist,
+            rules: rule.rulelist.rules.map((rule) => {
+              if (rule.name === variableName) {
+                return {
+                  ...rule,
+                  value: {
+                    ...rule.value,
+                    text: value,
+                  },
+                }
+              }
+
+              return rule
+            }),
+          },
+        }
       }
 
       return {
+        ...rule,
+        rulelist: {
+          ...rule.rulelist,
+          rules: [
+            ...rule.rulelist.rules,
+            {
+              ...ruleToCopy.rulelist.rules[0],
+              name: variableName,
+              value: {
+                ...ruleToCopy.rulelist.rules[0].value,
+                text: value,
+              },
+            },
+          ],
+        },
+      }
+    })
+  }
+
+  if (!hasSuchSelector) {
+    newAst.rules = [
+      ...newAst.rules,
+      {
+        ...ruleToCopy,
+        selector: newSelector,
+        rulelist: {
+          ...ruleToCopy.rulelist,
+          rules: [
+            {
+              ...ruleToCopy.rulelist.rules[0],
+
+              name: variableName,
+              value: {
+                ...ruleToCopy.rulelist.rules[0].value,
+                text: value,
+              },
+            },
+          ],
+        },
+      },
+    ]
+  }
+
+  return newAst
+}
+
+const replaceVariableInStyleTag = (args = {}) => {
+  args = {
+    variableDescriptor: {},
+    value: '',
+    device: 'desktop',
+    ...args,
+  }
+
+  persistNewAsts(
+    getStyleTagsWithAst().map((styleDescriptor) => {
+      return {
         ...styleDescriptor,
-        ast: newAst,
+        ast: replaceVariableInAst({
+          ...args,
+          ast: styleDescriptor.ast,
+        }),
       }
     })
   )
