@@ -3,6 +3,10 @@ import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive
 import { prepareBoxShadowValueFor } from './boxShadow'
 import * as shadyCss from 'shady-css-parser'
 
+console.log('here custom mapping')
+
+const getStylesForReplace = () => {}
+
 const deviceMapping = {
   desktop: 'ct-main-styles-inline-css',
   tablet: 'ct-main-styles-tablet-inline-css',
@@ -145,12 +149,7 @@ const replaceVariableInStyleTag = (
 }
 
 const replacingLogic = (args = {}) => {
-  const {
-    variableDescriptor,
-    value,
-    device = 'desktop',
-    customReplaceVariableInStyleTag = null,
-  } = args
+  const { variableDescriptor, value, device = 'desktop' } = args
 
   let actualValue =
     (variableDescriptor.type || '').indexOf('color') > -1
@@ -180,31 +179,16 @@ const replacingLogic = (args = {}) => {
     actualValue = prepareBoxShadowValueFor(value, variableDescriptor)
   }
 
-  if (customReplaceVariableInStyleTag) {
-    customReplaceVariableInStyleTag({
-      replaceVariableInStyleTag,
-      variableDescriptor,
-      value: `${actualValue}${variableDescriptor.unit || ''}${
-        variableDescriptor.important ? ' !important' : ''
-      }`,
-      device,
-    })
-  } else {
-    replaceVariableInStyleTag(
-      variableDescriptor,
-      `${actualValue}${variableDescriptor.unit || ''}${
-        variableDescriptor.important ? ' !important' : ''
-      }`,
-      device
-    )
-  }
+  replaceVariableInStyleTag(
+    variableDescriptor,
+    `${actualValue}${variableDescriptor.unit || ''}${
+      variableDescriptor.important ? ' !important' : ''
+    }`,
+    device
+  )
 }
 
-export const handleSingleVariableFor = (
-  variableDescriptor,
-  value,
-  customReplaceVariableInStyleTag = null
-) => {
+export const handleSingleVariableFor = (variableDescriptor, value) => {
   const fullValue = value
 
   value = variableDescriptor.extractValue
@@ -222,7 +206,6 @@ export const handleSingleVariableFor = (
     replacingLogic({
       variableDescriptor,
       value,
-      customReplaceVariableInStyleTag,
     })
 
     return
@@ -240,21 +223,18 @@ export const handleSingleVariableFor = (
     variableDescriptor,
     value: value.desktop,
     device: 'desktop',
-    customReplaceVariableInStyleTag,
   })
 
   replacingLogic({
     variableDescriptor,
     value: value.tablet,
     device: 'tablet',
-    customReplaceVariableInStyleTag,
   })
 
   replacingLogic({
     variableDescriptor,
     value: value.mobile,
     device: 'mobile',
-    customReplaceVariableInStyleTag,
   })
 }
 
@@ -275,6 +255,8 @@ export const mountAstCache = () => {
 }
 
 export const handleVariablesFor = (variables) => {
+  console.log('here mount me')
+  return
   mountAstCache()
 
   wp.customize.bind('change', (e) => {
