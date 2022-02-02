@@ -253,27 +253,3 @@ export const mountAstCache = () => {
     cssParsedIndex[device].ast = parser.parse(cssContainer.innerText)
   })
 }
-
-export const handleVariablesFor = (variables) => {
-  console.log('here mount me')
-  return
-  mountAstCache()
-
-  wp.customize.bind('change', (e) => {
-    if (!variables[e.id]) {
-      return
-    }
-
-    let allDescriptors = variables[e.id]
-
-    if (isFunction(allDescriptors)) {
-      allDescriptors = allDescriptors(e())
-    }
-
-    if (!Array.isArray(allDescriptors)) {
-      allDescriptors = [allDescriptors]
-    }
-
-    allDescriptors.map((d) => handleSingleVariableFor(d, e()))
-  })
-}
