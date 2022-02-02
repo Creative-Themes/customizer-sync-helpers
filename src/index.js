@@ -268,13 +268,9 @@ export const mountAstCache = () => {
       return
     }
 
-    let existingCss = cssContainer.innerText
-
     const parser = new shadyCss.Parser()
-    const stringifier = new shadyCss.Stringifier()
 
-    const ast = parser.parse(existingCss)
-    cssParsedIndex[device].ast = ast
+    cssParsedIndex[device].ast = parser.parse(cssContainer.innerText)
   })
 }
 
