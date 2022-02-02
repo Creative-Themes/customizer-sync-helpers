@@ -28,3 +28,13 @@ export const getStyleTagsWithAst = () => {
 
   return styleTagsCache
 }
+
+export const persistNewAsts = (styleTags) => {
+  styleTagsCache = styleTags
+
+  const stringifier = new shadyCss.Stringifier()
+
+  styleTagsCache.map((styleDescriptor) => {
+    styleDescriptor.style.innerText = stringifier.stringify(styleDescriptor.ast)
+  })
+}

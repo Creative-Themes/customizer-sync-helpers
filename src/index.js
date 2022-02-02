@@ -4,19 +4,13 @@ import { prepareBoxShadowValueFor } from './types/boxShadow'
 import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive'
 import * as shadyCss from 'shady-css-parser'
 
-import { getStyleTagsWithAst } from './ast'
-
-const cssParsedIndex = {
-  desktop: { ast: {} },
-  tablet: { ast: {} },
-  mobile: { ast: {} },
-}
+import { getStyleTagsWithAst, persistNewAsts } from './ast'
 
 const isFunction = (functionToCheck) =>
   functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
 
 const replaceVariableInStyleTag = (args = {}) => {
-  let args = {
+  args = {
     variableDescriptor: {},
     value: '',
     device: 'desktop',
@@ -24,13 +18,6 @@ const replaceVariableInStyleTag = (args = {}) => {
   }
 
   let { variableDescriptor, value, device } = args
-
-  console.log('here about to replace', {
-    variableDescriptor,
-    value,
-    device,
-    getStyleTagsWithAst: getStyleTagsWithAst(),
-  })
 
   const newSelector = variableDescriptor.selector || ':root'
 
@@ -46,23 +33,22 @@ const replaceVariableInStyleTag = (args = {}) => {
       : variableDescriptor.variable
   }`
 
-  getStyleTagsWithAst().map((styleDescriptor) => {
-    let hasSuchSelector = styleDescriptor.ast.rules.find(
-      ({ selector }) => selector === newSelector
-    )
+  persistNewAsts(
+    getStyleTagsWithAst().map((styleDescriptor) => {
+      let hasSuchSelector = styleDescriptor.ast.rules.find(
+        ({ selector }) => selector === newSelector
+      )
 
-    const ruleToCopy = styleDescriptor.ast.rules.find(
-      ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
-    )
-  })
+      const ruleToCopy = styleDescriptor.ast.rules.find(
+        ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
+      )
 
-  return
+      let newAst = {
+        ...styleDescriptor.ast,
+      }
 
-  const newAst = {
-    ...cssParsedIndex[device].ast,
-
-    rules: hasSuchSelector
-      ? cssParsedIndex[device].ast.rules.map((rule) => {
+      if (hasSuchSelector) {
+        newAst.rules = styleDescriptor.ast.rules.map((rule) => {
           let { selector } = rule
 
           if (selector !== newSelector) {
@@ -121,8 +107,11 @@ const replaceVariableInStyleTag = (args = {}) => {
             },
           }
         })
-      : [
-          ...cssParsedIndex[device].ast.rules,
+      }
+
+      if (!hasSuchSelector) {
+        newAst.rules = [
+          ...newAst.rules,
           {
             ...ruleToCopy,
             selector: newSelector,
@@ -141,16 +130,15 @@ const replaceVariableInStyleTag = (args = {}) => {
               ],
             },
           },
-        ],
-  }
+        ]
+      }
 
-  const stringifier = new shadyCss.Stringifier()
-
-  cssParsedIndex[device].ast = newAst
-
-  document.querySelector(
-    `style#ct-main-styles-inline-css`
-  ).innerText = stringifier.stringify(newAst)
+      return {
+        ...styleDescriptor,
+        ast: newAst,
+      }
+    })
+  )
 }
 
 const replacingLogic = (args = {}) => {
