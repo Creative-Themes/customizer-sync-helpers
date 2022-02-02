@@ -1,17 +1,10 @@
-import { prepareSpacingValueFor } from './spacing'
+import { prepareSpacingValueFor } from './types/spacing'
+import { prepareBoxShadowValueFor } from './types/boxShadow'
+
 import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive'
-import { prepareBoxShadowValueFor } from './boxShadow'
 import * as shadyCss from 'shady-css-parser'
 
-console.log('here custom mapping')
-
-const getStylesForReplace = () => {}
-
-const deviceMapping = {
-  desktop: 'ct-main-styles-inline-css',
-  tablet: 'ct-main-styles-tablet-inline-css',
-  mobile: 'ct-main-styles-mobile-inline-css',
-}
+import { getStyleTagsWithAst } from './ast'
 
 const cssParsedIndex = {
   desktop: { ast: {} },
@@ -22,16 +15,26 @@ const cssParsedIndex = {
 const isFunction = (functionToCheck) =>
   functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
 
-const replaceVariableInStyleTag = (
-  variableDescriptor,
-  value,
-  device = 'desktop'
-) => {
-  const newSelector = `${
-    variableDescriptor[`${device}_selector_prefix`]
-      ? `${variableDescriptor[`${device}_selector_prefix`]} `
-      : ''
-  }${variableDescriptor.selector || ':root'}`
+const replaceVariableInStyleTag = (args = {}) => {
+  let args = {
+    variableDescriptor: {},
+    value: '',
+    device: 'desktop',
+    ...args,
+  }
+
+  let { variableDescriptor, value, device } = args
+
+  console.log('here about to replace', {
+    variableDescriptor,
+    value,
+    device,
+    getStyleTagsWithAst: getStyleTagsWithAst(),
+  })
+
+  return
+
+  const newSelector = variableDescriptor.selector || ':root'
 
   let variablePrefix = '--'
 
@@ -144,12 +147,17 @@ const replaceVariableInStyleTag = (
   cssParsedIndex[device].ast = newAst
 
   document.querySelector(
-    `style#${deviceMapping[device]}`
+    `style#ct-main-styles-inline-css`
   ).innerText = stringifier.stringify(newAst)
 }
 
 const replacingLogic = (args = {}) => {
-  const { variableDescriptor, value, device = 'desktop' } = args
+  const {
+    variableDescriptor,
+    value,
+    device = 'desktop',
+    ...remainingArgs
+  } = args
 
   let actualValue =
     (variableDescriptor.type || '').indexOf('color') > -1
@@ -179,16 +187,25 @@ const replacingLogic = (args = {}) => {
     actualValue = prepareBoxShadowValueFor(value, variableDescriptor)
   }
 
-  replaceVariableInStyleTag(
+  replaceVariableInStyleTag({
     variableDescriptor,
-    `${actualValue}${variableDescriptor.unit || ''}${
+    value: `${actualValue}${variableDescriptor.unit || ''}${
       variableDescriptor.important ? ' !important' : ''
     }`,
-    device
-  )
+    device,
+  })
 }
 
-export const handleSingleVariableFor = (variableDescriptor, value) => {
+export const updateVariableInStyleTags = (args = {}) => {
+  let { variableDescriptor, value } = {
+    variableDescriptor: {},
+    value: '',
+
+    // TODO: multiple styles matching
+
+    ...args,
+  }
+
   const fullValue = value
 
   value = variableDescriptor.extractValue
@@ -211,14 +228,6 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
     return
   }
 
-  if (variableDescriptor.enabled) {
-    if (!wp.customize(variableDescriptor.enabled)() === 'no') {
-      value.mobile = '0' + (variableDescriptor.unit ? '' : 'px')
-      value.tablet = '0' + (variableDescriptor.unit ? '' : 'px')
-      value.desktop = '0' + (variableDescriptor.unit ? '' : 'px')
-    }
-  }
-
   replacingLogic({
     variableDescriptor,
     value: value.desktop,
@@ -238,18 +247,4 @@ export const handleSingleVariableFor = (variableDescriptor, value) => {
   })
 }
 
-export const mountAstCache = () => {
-  Object.keys(deviceMapping).map((device) => {
-    const cssContainer = document.querySelector(
-      `style#${deviceMapping[device]}`
-    )
-
-    if (!cssContainer) {
-      return
-    }
-
-    const parser = new shadyCss.Parser()
-
-    cssParsedIndex[device].ast = parser.parse(cssContainer.innerText)
-  })
-}
+export { clearAstCache } from './ast'

@@ -1,3 +1,4 @@
+// Maybe this is not needed at all
 const handleSingleVariableFor = (variableDescriptor, value) =>
   [
     ...(variableDescriptor.selector
