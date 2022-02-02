@@ -19,6 +19,13 @@ const replaceVariableInStyleTag = (args = {}) => {
 
   let { variableDescriptor, value, device } = args
 
+  console.log('here about to replace', {
+    variableDescriptor,
+    value,
+    device,
+    getStyleTagsWithAst: getStyleTagsWithAst(),
+  })
+
   const newSelector = variableDescriptor.selector || ':root'
 
   let variablePrefix = '--'
@@ -75,35 +82,43 @@ const replaceVariableInStyleTag = (args = {}) => {
             ({ name }) => name === variableName
           )
 
+          if (hasSuchRule) {
+            return {
+              ...rule,
+              rulelist: {
+                ...rule.rulelist,
+                rules: rule.rulelist.rules.map((rule) => {
+                  if (rule.name === variableName) {
+                    return {
+                      ...rule,
+                      value: {
+                        ...rule.value,
+                        text: value,
+                      },
+                    }
+                  }
+
+                  return rule
+                }),
+              },
+            }
+          }
+
           return {
             ...rule,
             rulelist: {
               ...rule.rulelist,
-              rules: hasSuchRule
-                ? rule.rulelist.rules.map((rule) => {
-                    if (rule.name === variableName) {
-                      return {
-                        ...rule,
-                        value: {
-                          ...rule.value,
-                          text: value,
-                        },
-                      }
-                    }
-
-                    return rule
-                  })
-                : [
-                    ...rule.rulelist.rules,
-                    {
-                      ...ruleToCopy.rulelist.rules[0],
-                      name: variableName,
-                      value: {
-                        ...ruleToCopy.rulelist.rules[0].value,
-                        text: value,
-                      },
-                    },
-                  ],
+              rules: [
+                ...rule.rulelist.rules,
+                {
+                  ...ruleToCopy.rulelist.rules[0],
+                  name: variableName,
+                  value: {
+                    ...ruleToCopy.rulelist.rules[0].value,
+                    text: value,
+                  },
+                },
+              ],
             },
           }
         })
