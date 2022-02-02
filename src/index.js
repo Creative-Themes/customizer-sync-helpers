@@ -32,8 +32,6 @@ const replaceVariableInStyleTag = (args = {}) => {
     getStyleTagsWithAst: getStyleTagsWithAst(),
   })
 
-  return
-
   const newSelector = variableDescriptor.selector || ':root'
 
   let variablePrefix = '--'
@@ -48,13 +46,17 @@ const replaceVariableInStyleTag = (args = {}) => {
       : variableDescriptor.variable
   }`
 
-  let hasSuchSelector = cssParsedIndex[device].ast.rules.find(
-    ({ selector }) => selector === newSelector
-  )
+  getStyleTagsWithAst().map((styleDescriptor) => {
+    let hasSuchSelector = styleDescriptor.ast.rules.find(
+      ({ selector }) => selector === newSelector
+    )
 
-  const ruleToCopy = cssParsedIndex[device].ast.rules.find(
-    ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
-  )
+    const ruleToCopy = styleDescriptor.ast.rules.find(
+      ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
+    )
+  })
+
+  return
 
   const newAst = {
     ...cssParsedIndex[device].ast,
