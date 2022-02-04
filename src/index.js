@@ -42,9 +42,9 @@ const replaceVariableInAst = (args = {}) => {
     ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
   )
 
-  let newAst = {
-    ...ast,
-  }
+  let newAst = JSON.parse(JSON.stringify(ast))
+
+  console.log('here', { newAst })
 
   if (hasSuchSelector) {
     newAst.rules = newAst.rules.map((rule) => {
@@ -168,6 +168,7 @@ const replacingLogic = (args = {}) => {
     variableDescriptor,
     value,
     device = 'desktop',
+    ast,
     ...remainingArgs
   } = args
 
@@ -209,36 +210,63 @@ const replacingLogic = (args = {}) => {
 }
 
 export const updateVariableInStyleTags = (args = {}) => {
-  let { variableDescriptor, value } = {
+  args = {
     variableDescriptor: {},
     value: '',
+    fullValue: {},
 
     // TODO: multiple styles matching
 
     ...args,
   }
 
-  const fullValue = value
+  let allDescriptors = Array.isArray(args.variableDescriptor)
+    ? args.variableDescriptor
+    : [args.variableDescriptor]
 
-  value = variableDescriptor.extractValue
-    ? variableDescriptor.extractValue(value)
-    : value
+  persistNewAsts(
+    getStyleTagsWithAst().map((styleDescriptor) => {
+      return {
+        ...styleDescriptor,
+        ast: allDescriptors.reduce((currentAst, variableDescriptor) => {
+          let value = variableDescriptor.fullValue ? args.fullValue : args.value
 
-  variableDescriptor.whenDone && variableDescriptor.whenDone(value, fullValue)
+          value = variableDescriptor.extractValue
+            ? variableDescriptor.extractValue(value)
+            : value
 
-  value = maybePromoteScalarValueIntoResponsive(
-    value,
-    !!variableDescriptor.responsive
+          if (variableDescriptor.whenDone) {
+            variableDescriptor.whenDone(value, args.value)
+          }
+
+          value = maybePromoteScalarValueIntoResponsive(
+            value,
+            !!variableDescriptor.responsive
+          )
+
+          if (!variableDescriptor.responsive) {
+            return replacingLogic({
+              variableDescriptor,
+              value,
+              device: 'desktop',
+              ast: currentAst,
+            })
+          }
+
+          return replacingLogic({
+            variableDescriptor,
+            value: value.desktop,
+            device: 'desktop',
+            ast: currentAst,
+          })
+        }, styleDescriptor.ast),
+      }
+    })
   )
 
-  if (!variableDescriptor.responsive) {
-    replacingLogic({
-      variableDescriptor,
-      value,
-    })
+  console.log('here', variableDescriptor)
 
-    return
-  }
+  return
 
   replacingLogic({
     variableDescriptor,
