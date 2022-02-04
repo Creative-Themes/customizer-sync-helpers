@@ -1,7 +1,7 @@
 import { prepareSpacingValueFor } from './types/spacing'
 import { prepareBoxShadowValueFor } from './types/boxShadow'
 
-const isFunction = (functionToCheck) =>
+export const isFunction = (functionToCheck) =>
   functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
 
 const replaceVariableInAst = (args = {}) => {

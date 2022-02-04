@@ -1,6 +1,6 @@
 import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive'
 import { getStyleTagsWithAst, persistNewAsts } from './ast'
-import { replacingLogic } from './ast-replacing-logic'
+import { isFunction, replacingLogic } from './ast-replacing-logic'
 
 export const updateVariableInStyleTags = (args = {}) => {
   args = {
@@ -8,14 +8,21 @@ export const updateVariableInStyleTags = (args = {}) => {
     value: '',
     fullValue: {},
 
-    // TODO: multiple styles matching
+    tabletMQ: '(max-width: 999.98px)',
+    mobileMQ: '(max-width: 689.98px)',
 
     ...args,
   }
 
-  let allDescriptors = Array.isArray(args.variableDescriptor)
-    ? args.variableDescriptor
-    : [args.variableDescriptor]
+  let allDescriptors = args.variableDescriptor
+
+  if (isFunction(allDescriptors)) {
+    allDescriptors = allDescriptors(args.value)
+  }
+
+  if (!Array.isArray(allDescriptors)) {
+    allDescriptors = [allDescriptors]
+  }
 
   persistNewAsts(
     getStyleTagsWithAst().map((styleDescriptor) => {
@@ -45,11 +52,73 @@ export const updateVariableInStyleTags = (args = {}) => {
             })
           }
 
-          return replacingLogic({
+          let desktopAst = replacingLogic({
             variableDescriptor,
             value: value.desktop,
             ast: currentAst,
           })
+
+          let tabletAst = desktopAst
+
+          if (
+            tabletAst.rules.find(
+              ({ type, parameters }) =>
+                type === 'atRule' && parameters === args.tabletMQ
+            )
+          ) {
+            tabletAst = {
+              ...tabletAst,
+              rules: tabletAst.rules.map((rule) => {
+                if (
+                  rule.type !== 'atRule' ||
+                  rule.parameters !== args.tabletMQ
+                ) {
+                  return rule
+                }
+
+                return {
+                  ...rule,
+                  rulelist: replacingLogic({
+                    variableDescriptor,
+                    value: value.tablet,
+                    ast: rule.rulelist,
+                  }),
+                }
+              }),
+            }
+          }
+
+          let mobileAst = tabletAst
+
+          if (
+            mobileAst.rules.find(
+              ({ type, parameters }) =>
+                type === 'atRule' && parameters === args.mobileMQ
+            )
+          ) {
+            mobileAst = {
+              ...mobileAst,
+              rules: mobileAst.rules.map((rule) => {
+                if (
+                  rule.type !== 'atRule' ||
+                  rule.parameters !== args.mobileMQ
+                ) {
+                  return rule
+                }
+
+                return {
+                  ...rule,
+                  rulelist: replacingLogic({
+                    variableDescriptor,
+                    value: value.mobile,
+                    ast: rule.rulelist,
+                  }),
+                }
+              }),
+            }
+          }
+
+          return mobileAst
         }, styleDescriptor.ast),
       }
     })
