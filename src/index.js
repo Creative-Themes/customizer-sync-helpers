@@ -61,61 +61,101 @@ export const updateVariableInStyleTags = (args = {}) => {
           let tabletAst = desktopAst
 
           if (
-            tabletAst.rules.find(
+            !tabletAst.rules.find(
               ({ type, parameters }) =>
                 type === 'atRule' && parameters === args.tabletMQ
             )
           ) {
             tabletAst = {
               ...tabletAst,
-              rules: tabletAst.rules.map((rule) => {
-                if (
-                  rule.type !== 'atRule' ||
-                  rule.parameters !== args.tabletMQ
-                ) {
-                  return rule
-                }
-
-                return {
-                  ...rule,
-                  rulelist: replacingLogic({
-                    variableDescriptor,
-                    value: value.tablet,
-                    ast: rule.rulelist,
-                  }),
-                }
-              }),
+              rules: [
+                ...tabletAst.rules,
+                {
+                  type: 'atRule',
+                  name: 'media',
+                  parameters: args.tabletMQ,
+                  rulelist: {
+                    type: 'rulelist',
+                    rules: [],
+                  },
+                },
+              ],
             }
+          }
+
+          tabletAst = {
+            ...tabletAst,
+            rules: tabletAst.rules.map((rule) => {
+              if (rule.type !== 'atRule' || rule.parameters !== args.tabletMQ) {
+                return rule
+              }
+
+              return {
+                ...rule,
+                rulelist: replacingLogic({
+                  variableDescriptor: {
+                    ...variableDescriptor,
+                    selector:
+                      variableDescriptor.selector ===
+                      '.edit-post-visual-editor__content-area > div'
+                        ? ':root'
+                        : variableDescriptor.selector,
+                  },
+                  value: value.tablet,
+                  ast: rule.rulelist,
+                }),
+              }
+            }),
           }
 
           let mobileAst = tabletAst
 
           if (
-            mobileAst.rules.find(
+            !mobileAst.rules.find(
               ({ type, parameters }) =>
                 type === 'atRule' && parameters === args.mobileMQ
             )
           ) {
             mobileAst = {
               ...mobileAst,
-              rules: mobileAst.rules.map((rule) => {
-                if (
-                  rule.type !== 'atRule' ||
-                  rule.parameters !== args.mobileMQ
-                ) {
-                  return rule
-                }
-
-                return {
-                  ...rule,
-                  rulelist: replacingLogic({
-                    variableDescriptor,
-                    value: value.mobile,
-                    ast: rule.rulelist,
-                  }),
-                }
-              }),
+              rules: [
+                ...mobileAst.rules,
+                {
+                  type: 'atRule',
+                  name: 'media',
+                  parameters: args.mobileMQ,
+                  rulelist: {
+                    type: 'rulelist',
+                    rules: [],
+                  },
+                },
+              ],
             }
+          }
+
+          mobileAst = {
+            ...mobileAst,
+            rules: mobileAst.rules.map((rule) => {
+              if (rule.type !== 'atRule' || rule.parameters !== args.mobileMQ) {
+                return rule
+              }
+
+              return {
+                ...rule,
+                rulelist: replacingLogic({
+                  variableDescriptor: {
+                    ...variableDescriptor,
+                    selector:
+                      variableDescriptor.selector ===
+                      '.edit-post-visual-editor__content-area > div'
+                        ? ':root'
+                        : variableDescriptor.selector,
+                  },
+                  value: value.mobile,
+                  ast: rule.rulelist,
+                }),
+              }
+            }),
           }
 
           return mobileAst

@@ -32,9 +32,23 @@ const replaceVariableInAst = (args = {}) => {
     ({ selector }) => selector === newSelector
   )
 
-  const ruleToCopy = ast.rules.find(
-    ({ type, rulelist }) => type === 'ruleset' && rulelist.rules.length > 0
-  )
+  const ruleToCopy = {
+    type: 'ruleset',
+    selector: ':root',
+    rulelist: {
+      type: 'rulelist',
+      rules: [
+        {
+          type: 'declaration',
+          name: '--container-max-width',
+          value: {
+            type: 'expression',
+            text: '1290px',
+          },
+        },
+      ],
+    },
+  }
 
   let newAst = JSON.parse(JSON.stringify(ast))
 
@@ -172,7 +186,9 @@ export const replacingLogic = (args = {}) => {
 
   return replaceVariableInAst({
     variableDescriptor: args.variableDescriptor,
-    value: actualValue,
+    value: `${actualValue}${args.variableDescriptor.unit || ''}${
+      args.variableDescriptor.important ? ' !important' : ''
+    }`,
     ast: args.ast,
   })
 }

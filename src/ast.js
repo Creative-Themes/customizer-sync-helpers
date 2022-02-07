@@ -19,12 +19,27 @@ export const getStyleTagsWithAst = () => {
 
   const parser = new shadyCss.Parser()
 
-  styleTagsCache = [
-    {
-      style: maybeStyle,
-      ast: parser.parse(maybeStyle.innerText),
-    },
-  ]
+  let allStyles = [...document.querySelectorAll('style')].filter(
+    (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+  )
+
+  const maybeIframe = document.querySelector(
+    '.edit-post-visual-editor__content-area iframe'
+  )
+
+  if (maybeIframe) {
+    allStyles = [
+      ...allStyles,
+      ...[...maybeIframe.contentDocument.querySelectorAll('style')].filter(
+        (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+      ),
+    ]
+  }
+
+  styleTagsCache = allStyles.map((style) => ({
+    style,
+    ast: parser.parse(style.innerText.replace(new RegExp('\n', 'g'), '')),
+  }))
 
   return styleTagsCache
 }
