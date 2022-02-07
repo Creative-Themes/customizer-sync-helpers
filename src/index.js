@@ -165,4 +165,4 @@ export const updateVariableInStyleTags = (args = {}) => {
   )
 }
 
-export { clearAstCache } from './ast'
+export { clearAstCache, overrideStylesWithAst } from './ast'

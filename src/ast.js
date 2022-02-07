@@ -53,3 +53,40 @@ export const persistNewAsts = (styleTags) => {
     styleDescriptor.style.innerText = stringifier.stringify(styleDescriptor.ast)
   })
 }
+
+export const overrideStylesWithAst = () => {
+  if (!styleTagsCache) {
+    return
+  }
+
+  persistNewAsts(
+    styleTagsCache.map((styleDescriptor) => {
+      if (styleDescriptor.style.id) {
+        return styleDescriptor
+      }
+
+      let allStyles = [...document.querySelectorAll('style')].filter(
+        (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+      )
+
+      const maybeIframe = document.querySelector(
+        '.edit-post-visual-editor__content-area iframe'
+      )
+
+      if (maybeIframe) {
+        allStyles = [
+          ...allStyles,
+          ...[...maybeIframe.contentDocument.querySelectorAll('style')].filter(
+            (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+          ),
+        ]
+      }
+
+      styleDescriptor.style = allStyles.find((s) => !s.id)
+
+      return {
+        ...styleDescriptor,
+      }
+    })
+  )
+}
