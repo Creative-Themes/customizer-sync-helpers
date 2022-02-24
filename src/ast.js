@@ -20,7 +20,7 @@ export const getStyleTagsWithAst = () => {
   const parser = new shadyCss.Parser()
 
   let allStyles = [...document.querySelectorAll('style')].filter(
-    (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+    (s) => s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
   )
 
   const maybeIframe = document.querySelector(
