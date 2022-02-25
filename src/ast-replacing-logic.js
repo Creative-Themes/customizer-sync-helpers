@@ -156,14 +156,19 @@ export const replacingLogic = (args = {}) => {
     ...args,
   }
 
-  let actualValue =
-    (args.variableDescriptor.type || '').indexOf('color') > -1
-      ? args.value[
-          args.variableDescriptor.type === 'color'
-            ? 'default'
-            : args.variableDescriptor.type.split(':')[1]
-        ].color
-      : args.value
+  let actualValue = args.value
+
+  if (
+    (args.variableDescriptor.type || '').indexOf('color') > -1 &&
+    args.value !== 'CT_CSS_SKIP_RULE'
+  ) {
+    actualValue =
+      args.value[
+        args.variableDescriptor.type === 'color'
+          ? 'default'
+          : args.variableDescriptor.type.split(':')[1]
+      ].color
+  }
 
   if ((args.variableDescriptor.type || '') === 'border') {
     actualValue =
