@@ -61,8 +61,8 @@ const replaceVariableInAst = (args = {}) => {
       }
 
       if (
-        value.indexOf('CT_CSS_SKIP_RULE' || value.indexOf(variableName) > -1) >
-        -1
+        value.indexOf('CT_CSS_SKIP_RULE') > -1 ||
+        value.indexOf(variableName) > -1
       ) {
         return {
           ...rule,
@@ -121,7 +121,7 @@ const replaceVariableInAst = (args = {}) => {
     })
   }
 
-  if (!hasSuchSelector) {
+  if (!hasSuchSelector && value.indexOf('CT_CSS_SKIP_RULE') === -1) {
     newAst.rules = [
       ...newAst.rules,
       {
