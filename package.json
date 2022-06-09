@@ -1,6 +1,6 @@
 {
   "name": "customizer-sync-helpers",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "description": "Helpers for syncing customizer controls",
   "author": "andreiglingeanu",
   "license": "MIT",
@@ -20,18 +20,19 @@
   "devDependencies": {
     "@babel/core": "^7.5.4",
     "@babel/preset-env": "^7.5.4",
-    "cross-env": "^5.1.4",
-    "prettier": "^2.2.1",
-    "rollup": "^2.75.6",
     "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "cross-env": "^5.1.4",
+    "prettier": "^2.2.1",
+    "rollup": "^2.75.6",
     "rollup-plugin-peer-deps-external": "^2.2.4"
   },
   "files": [
     "dist"
   ],
   "dependencies": {
-    "shady-css-parser": "^0.1.0"
+    "shady-css-parser": "^0.1.0",
+    "util": "^0.12.4"
   }
 }
