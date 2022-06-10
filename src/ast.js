@@ -1,5 +1,11 @@
 import * as shadyCss from 'shady-css-parser'
 
+const maybeGetPreviewerIframe = () => {
+  return document.querySelector(
+    '.edit-post-visual-editor__content-area iframe[name="editor-canvas"]'
+  )
+}
+
 let styleTagsCache = null
 
 export const clearAstCache = () => {
@@ -23,9 +29,7 @@ export const getStyleTagsWithAst = () => {
     (s) => s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
   )
 
-  const maybeIframe = document.querySelector(
-    '.edit-post-visual-editor__content-area iframe'
-  )
+  const maybeIframe = maybeGetPreviewerIframe()
 
   if (maybeIframe) {
     allStyles = [
@@ -50,6 +54,11 @@ export const persistNewAsts = (styleTags) => {
   const stringifier = new shadyCss.Stringifier()
 
   styleTagsCache.map((styleDescriptor) => {
+    if (!styleDescriptor.style) {
+      console.error('No ast for style', styleDescriptor)
+      return
+    }
+
     styleDescriptor.style.innerText = stringifier.stringify(styleDescriptor.ast)
   })
 }
@@ -69,9 +78,7 @@ export const overrideStylesWithAst = () => {
         (s) => s.innerText.indexOf('narrow-container-max-width') > -1
       )
 
-      const maybeIframe = document.querySelector(
-        '.edit-post-visual-editor__content-area iframe'
-      )
+      const maybeIframe = maybeGetPreviewerIframe()
 
       if (maybeIframe) {
         allStyles = [
