@@ -32,7 +32,6 @@
     "dist"
   ],
   "dependencies": {
-    "shady-css-parser": "^0.1.0",
-    "util": "^0.12.4"
+    "shady-css-parser": "^0.1.0"
   }
 }

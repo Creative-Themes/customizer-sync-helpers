@@ -24,11 +24,10 @@ export default [
     plugins: [
       external(),
       babel({
+        babelHelpers: 'bundled',
         exclude: 'node_modules/**',
       }),
-      nodeResolve({
-        preferBuiltins: false,
-      }),
+      nodeResolve(),
       commonjs(),
     ],
   },
@@ -51,11 +50,10 @@ export default [
     plugins: [
       external(),
       babel({
+        babelHelpers: 'bundled',
         exclude: 'node_modules/**',
       }),
-      nodeResolve({
-        preferBuiltins: false,
-      }),
+      nodeResolve(),
       commonjs(),
     ],
   },
@@ -78,9 +76,10 @@ export default [
     plugins: [
       external(),
       babel({
+        babelHelpers: 'bundled',
         exclude: 'node_modules/**',
       }),
-      nodeResolve({ preferBuiltins: false }),
+      nodeResolve(),
       commonjs(),
     ],
   },
