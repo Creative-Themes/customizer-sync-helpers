@@ -76,7 +76,8 @@ export const overrideStylesWithAst = () => {
       }
 
       let allStyles = [...document.querySelectorAll('style')].filter(
-        (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+        (s) =>
+          s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
       )
 
       const maybeIframe = maybeGetPreviewerIframe()
@@ -85,7 +86,9 @@ export const overrideStylesWithAst = () => {
         allStyles = [
           ...allStyles,
           ...[...maybeIframe.contentDocument.querySelectorAll('style')].filter(
-            (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+            (s) =>
+              s.innerText &&
+              s.innerText.indexOf('narrow-container-max-width') > -1
           ),
         ]
       }
