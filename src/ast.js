@@ -35,7 +35,8 @@ export const getStyleTagsWithAst = () => {
     allStyles = [
       ...allStyles,
       ...[...maybeIframe.contentDocument.querySelectorAll('style')].filter(
-        (s) => s.innerText.indexOf('narrow-container-max-width') > -1
+        (s) =>
+          s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
       ),
     ]
   }
