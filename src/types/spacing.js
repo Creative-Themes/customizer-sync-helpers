@@ -1,4 +1,4 @@
-export const prepareSpacingValueFor = value => {
+export const prepareSpacingValueFor = (value) => {
   if (
     [value['top'], value['right'], value['bottom'], value['left']].reduce(
       (isValueCompact, currentValue) =>
@@ -6,8 +6,8 @@ export const prepareSpacingValueFor = value => {
           ? false
           : !(
               currentValue !== 'auto' &&
-              currentValue &&
-              currentValue.toString().match(/\d/g)
+              currentValue.trim() !== '' &&
+              currentValue.toString()[0] !== '0'
             ),
       true
     )
@@ -16,21 +16,29 @@ export const prepareSpacingValueFor = value => {
   }
 
   const result = [
-    value['top'] === 'auto' || !value['top'].toString().match(/\d/g)
+    value['top'] === 'auto' ||
+    value['top'].trim() === '' ||
+    value['top'][0] === '0'
       ? 0
       : value['top'],
 
-    value['right'] === 'auto' || !value['right'].toString().match(/\d/g)
+    value['right'] === 'auto' ||
+    value['right'].trim() === '' ||
+    value['right'][0] === '0'
       ? 0
       : value['right'],
 
-    value['bottom'] === 'auto' || !value['bottom'].toString().match(/\d/g)
+    value['bottom'] === 'auto' ||
+    value['bottom'].trim() === '' ||
+    value['bottom'][0] === '0'
       ? 0
       : value['bottom'],
 
-    value['left'] === 'auto' || !value['left'].toString().match(/\d/g)
+    value['left'] === 'auto' ||
+    value['left'].trim() === '' ||
+    value['left'][0] === '0'
       ? 0
-      : value['left']
+      : value['left'],
   ]
 
   if (
