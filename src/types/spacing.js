@@ -1,4 +1,8 @@
 export const prepareSpacingValueFor = (value) => {
+  if (typeof value === 'string' && value.indexOf('CT_CSS_SKIP_RULE') !== -1) {
+    return 'CT_CSS_SKIP_RULE'
+  }
+
   if (
     [value['top'], value['right'], value['bottom'], value['left']].reduce(
       (isValueCompact, currentValue) =>
