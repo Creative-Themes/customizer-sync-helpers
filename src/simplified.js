@@ -1,3 +1,6 @@
+const isFunction = (functionToCheck) =>
+  functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
+
 // Maybe this is not needed at all
 const handleSingleVariableFor = (variableDescriptor, value) =>
   [
@@ -27,12 +30,20 @@ const handleSingleVariableFor = (variableDescriptor, value) =>
   })
 
 export const handleVariablesFor = (variables) =>
-  wp.customize.bind(
-    'change',
-    (e) =>
-      variables[e.id] &&
-      (Array.isArray(variables[e.id])
-        ? variables[e.id]
-        : [variables[e.id]]
-      ).map((d) => handleSingleVariableFor(d, e()))
-  )
+  wp.customize.bind('change', (e) => {
+    if (!variables[e.id]) {
+      return
+    }
+
+    let allVariables = variables[e.id]
+
+    if (isFunction(allVariables)) {
+      allVariables = allVariables(e())
+    }
+
+    if (!Array.isArray(allVariables)) {
+      allVariables = [allVariables]
+    }
+
+    allVariables.map((d) => handleSingleVariableFor(d, e()))
+  })
