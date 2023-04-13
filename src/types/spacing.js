@@ -8,11 +8,7 @@ export const prepareSpacingValueFor = (value) => {
       (isValueCompact, currentValue) =>
         !isValueCompact
           ? false
-          : !(
-              currentValue !== 'auto' &&
-              currentValue.trim() !== '' &&
-              currentValue.toString()[0] !== '0'
-            ),
+          : !(currentValue !== 'auto' && currentValue.trim() !== ''),
       true
     )
   ) {
