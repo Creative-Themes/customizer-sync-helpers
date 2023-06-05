@@ -18,25 +18,25 @@ export const prepareSpacingValueFor = (value) => {
   const result = [
     value['top'] === 'auto' ||
     value['top'].trim() === '' ||
-    value['top'][0] === '0'
+    value['top'].toString() === '0'
       ? 0
       : value['top'],
 
     value['right'] === 'auto' ||
     value['right'].trim() === '' ||
-    value['right'][0] === '0'
+    value['right'].toString() === '0'
       ? 0
       : value['right'],
 
     value['bottom'] === 'auto' ||
     value['bottom'].trim() === '' ||
-    value['bottom'][0] === '0'
+    value['bottom'].toString() === '0'
       ? 0
       : value['bottom'],
 
     value['left'] === 'auto' ||
     value['left'].trim() === '' ||
-    value['left'][0] === '0'
+    value['left'].toString() === '0'
       ? 0
       : value['left'],
   ]
