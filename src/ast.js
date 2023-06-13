@@ -60,7 +60,32 @@ export const persistNewAsts = (styleTags) => {
       return
     }
 
-    styleDescriptor.style.innerText = stringifier.stringify(styleDescriptor.ast)
+    const groupedRules = styleDescriptor.ast.rules.reduce(
+      (result, rule) => {
+        if (rule.type === 'atRule' && rule.name === 'media') {
+          return {
+            ...result,
+            media: [...result.media, rule],
+          }
+        }
+
+        return {
+          ...result,
+          nonMedia: [...result.nonMedia, rule],
+        }
+      },
+      {
+        nonMedia: [],
+        media: [],
+      }
+    )
+
+    const newCss = stringifier.stringify({
+      ...styleDescriptor.ast,
+      rules: [...groupedRules.nonMedia, ...groupedRules.media],
+    })
+
+    styleDescriptor.style.innerText = newCss
   })
 }
 
