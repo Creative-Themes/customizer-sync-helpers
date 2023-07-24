@@ -24,9 +24,14 @@ export const prepareSpacingValueFor = (value, variableDescriptor) => {
   if (emptyValue !== 0) {
     let unit = 0
 
-    Object.values(value).forEach((value) => {
-      if (value && parseFloat(value).toString() !== value) {
-        unit = value.replace(parseFloat(value).toString(), '')
+    Object.values(value).forEach((singularValue) => {
+      if (
+        singularValue &&
+        parseFloat(singularValue).toString() !== singularValue
+      ) {
+        unit = singularValue
+          .toString()
+          .replace(parseFloat(singularValue).toString(), '')
       }
     })
 
