@@ -182,7 +182,7 @@ export const replacingLogic = (args = {}) => {
   }
 
   if ((args.variableDescriptor.type || '') === 'spacing') {
-    actualValue = prepareSpacingValueFor(args.value)
+    actualValue = prepareSpacingValueFor(args.value, args.variableDescriptor)
   }
 
   if ((args.variableDescriptor.type || '') === 'box-shadow') {

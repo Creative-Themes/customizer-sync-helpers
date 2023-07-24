@@ -1,4 +1,4 @@
-export const prepareSpacingValueFor = (value) => {
+export const prepareSpacingValueFor = (value, variableDescriptor) => {
   if (typeof value === 'string' && value.indexOf('CT_CSS_SKIP_RULE') !== -1) {
     return 'CT_CSS_SKIP_RULE'
   }
@@ -15,29 +15,47 @@ export const prepareSpacingValueFor = (value) => {
     return 'CT_CSS_SKIP_RULE'
   }
 
+  let emptyValue = 0
+
+  if (variableDescriptor.emptyValue) {
+    emptyValue = variableDescriptor.emptyValue
+  }
+
+  if (emptyValue !== 0) {
+    let unit = 0
+
+    Object.values(value).forEach((value) => {
+      if (value && parseFloat(value).toString() !== value) {
+        unit = value.replace(parseFloat(value).toString(), '')
+      }
+    })
+
+    emptyValue = `${emptyValue}${unit}`
+  }
+
   const result = [
     value['top'] === 'auto' ||
     value['top'].trim() === '' ||
     value['top'].toString() === '0'
-      ? 0
+      ? emptyValue
       : value['top'],
 
     value['right'] === 'auto' ||
     value['right'].trim() === '' ||
     value['right'].toString() === '0'
-      ? 0
+      ? emptyValue
       : value['right'],
 
     value['bottom'] === 'auto' ||
     value['bottom'].trim() === '' ||
     value['bottom'].toString() === '0'
-      ? 0
+      ? emptyValue
       : value['bottom'],
 
     value['left'] === 'auto' ||
     value['left'].trim() === '' ||
     value['left'].toString() === '0'
-      ? 0
+      ? emptyValue
       : value['left'],
   ]
 
