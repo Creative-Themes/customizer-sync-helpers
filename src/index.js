@@ -11,6 +11,8 @@ export const updateVariableInStyleTags = (args = {}) => {
     tabletMQ: '(max-width: 999.98px)',
     mobileMQ: '(max-width: 689.98px)',
 
+    initialStyleTagsDescriptor: [],
+
     ...args,
   }
 
@@ -165,4 +167,4 @@ export const updateVariableInStyleTags = (args = {}) => {
   )
 }
 
-export { clearAstCache, overrideStylesWithAst } from './ast'
+export { clearAstCache } from './ast'

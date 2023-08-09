@@ -12,39 +12,68 @@ export const clearAstCache = () => {
   styleTagsCache = null
 }
 
-export const getStyleTagsWithAst = () => {
+export const getStyleTagsWithAst = (args = {}) => {
+  args = {
+    initialStyleTagsDescriptor: [],
+    ...args,
+  }
+
   if (styleTagsCache) {
     return styleTagsCache
   }
 
-  const maybeStyle = document.querySelector('#ct-main-styles-inline-css')
-
-  if (!maybeStyle) {
-    return []
-  }
-
   const parser = new shadyCss.Parser()
 
-  let allStyles = [...document.querySelectorAll('style')].filter(
-    (s) => s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
-  )
+  let allStyles = []
 
-  const maybeIframe = maybeGetPreviewerIframe()
+  const maybeStyle = document.querySelector('#ct-main-styles-inline-css')
 
-  if (maybeIframe) {
-    allStyles = [
-      ...allStyles,
-      ...[...maybeIframe.contentDocument.querySelectorAll('style')].filter(
-        (s) =>
-          s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
-      ),
-    ]
+  if (maybeStyle) {
+    allStyles.push(maybeStyle)
   }
 
-  styleTagsCache = allStyles.map((style) => ({
-    style,
-    ast: parser.parse(style.innerText.replace(new RegExp('\n', 'g'), '')),
-  }))
+  styleTagsCache = [
+    ...args.initialStyleTagsDescriptor,
+
+    ...allStyles.map((style) => ({
+      style,
+    })),
+  ].map((styleDescriptor) => {
+    let normalizedStyleDescriptor = {
+      readStyles: styleDescriptor.readStyles
+        ? styleDescriptor.readStyles
+        : () => {
+            if (!styleDescriptor.style) {
+              throw new Error(
+                'No style tag is provided. Please provide a style tag or a readStyles function.'
+              )
+            }
+
+            return styleDescriptor.style.innerText
+          },
+
+      persistStyles: styleDescriptor.persistStyles
+        ? styleDescriptor.persistStyles
+        : (newCss) => {
+            if (!styleDescriptor.style) {
+              throw new Error(
+                'No style tag is provided. Please provide a style tag or a persistStyles function.'
+              )
+            }
+
+            styleDescriptor.style.innerText = newCss
+          },
+    }
+
+    return {
+      ...normalizedStyleDescriptor,
+      ast: parser.parse(
+        normalizedStyleDescriptor
+          .readStyles()
+          .replace(new RegExp('\n', 'g'), '')
+      ),
+    }
+  })
 
   return styleTagsCache
 }
@@ -55,11 +84,6 @@ export const persistNewAsts = (styleTags) => {
   const stringifier = new shadyCss.Stringifier()
 
   styleTagsCache.map((styleDescriptor) => {
-    if (!styleDescriptor.style) {
-      console.error('No ast for style', styleDescriptor)
-      return
-    }
-
     const groupedRules = styleDescriptor.ast.rules.reduce(
       (result, rule) => {
         if (rule.type === 'atRule' && rule.name === 'media') {
@@ -85,44 +109,6 @@ export const persistNewAsts = (styleTags) => {
       rules: [...groupedRules.nonMedia, ...groupedRules.media],
     })
 
-    styleDescriptor.style.innerText = newCss
+    styleDescriptor.persistStyles(newCss)
   })
-}
-
-export const overrideStylesWithAst = () => {
-  if (!styleTagsCache) {
-    return
-  }
-
-  persistNewAsts(
-    styleTagsCache.map((styleDescriptor) => {
-      if (styleDescriptor.style.id) {
-        return styleDescriptor
-      }
-
-      let allStyles = [...document.querySelectorAll('style')].filter(
-        (s) =>
-          s.innerText && s.innerText.indexOf('narrow-container-max-width') > -1
-      )
-
-      const maybeIframe = maybeGetPreviewerIframe()
-
-      if (maybeIframe) {
-        allStyles = [
-          ...allStyles,
-          ...[...maybeIframe.contentDocument.querySelectorAll('style')].filter(
-            (s) =>
-              s.innerText &&
-              s.innerText.indexOf('narrow-container-max-width') > -1
-          ),
-        ]
-      }
-
-      styleDescriptor.style = allStyles.find((s) => !s.id)
-
-      return {
-        ...styleDescriptor,
-      }
-    })
-  )
 }
