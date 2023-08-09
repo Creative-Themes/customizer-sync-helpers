@@ -6,20 +6,21 @@ const maybeGetPreviewerIframe = () => {
   )
 }
 
-let styleTagsCache = null
+let styleTagsCache = {}
 
 export const clearAstCache = () => {
-  styleTagsCache = null
+  styleTagsCache = {}
 }
 
 export const getStyleTagsWithAst = (args = {}) => {
   args = {
+    cacheId: 'default',
     initialStyleTagsDescriptor: [],
     ...args,
   }
 
-  if (styleTagsCache) {
-    return styleTagsCache
+  if (styleTagsCache[args.cacheId]) {
+    return styleTagsCache[args.cacheId]
   }
 
   const parser = new shadyCss.Parser()
@@ -32,7 +33,7 @@ export const getStyleTagsWithAst = (args = {}) => {
     allStyles.push(maybeStyle)
   }
 
-  styleTagsCache = [
+  styleTagsCache[args.cacheId] = [
     ...args.initialStyleTagsDescriptor,
 
     ...allStyles.map((style) => ({
@@ -75,15 +76,15 @@ export const getStyleTagsWithAst = (args = {}) => {
     }
   })
 
-  return styleTagsCache
+  return styleTagsCache[args.cacheId]
 }
 
-export const persistNewAsts = (styleTags) => {
-  styleTagsCache = styleTags
+export const persistNewAsts = (cacheId, styleTags) => {
+  styleTagsCache[cacheId] = styleTags
 
   const stringifier = new shadyCss.Stringifier()
 
-  styleTagsCache.map((styleDescriptor) => {
+  styleTagsCache[cacheId].map((styleDescriptor) => {
     const groupedRules = styleDescriptor.ast.rules.reduce(
       (result, rule) => {
         if (rule.type === 'atRule' && rule.name === 'media') {

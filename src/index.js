@@ -11,6 +11,7 @@ export const updateVariableInStyleTags = (args = {}) => {
     tabletMQ: '(max-width: 999.98px)',
     mobileMQ: '(max-width: 689.98px)',
 
+    cacheId: 'default',
     initialStyleTagsDescriptor: [],
 
     ...args,
@@ -27,7 +28,11 @@ export const updateVariableInStyleTags = (args = {}) => {
   }
 
   persistNewAsts(
-    getStyleTagsWithAst().map((styleDescriptor) => {
+    args['cacheId'],
+    getStyleTagsWithAst({
+      cacheId: args['cacheId'],
+      initialStyleTagsDescriptor: args.initialStyleTagsDescriptor,
+    }).map((styleDescriptor) => {
       return {
         ...styleDescriptor,
         ast: allDescriptors.reduce((currentAst, variableDescriptor) => {
