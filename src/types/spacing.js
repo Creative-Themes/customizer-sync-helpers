@@ -1,18 +1,11 @@
 export const prepareSpacingValueFor = (value, variableDescriptor) => {
-  if (typeof value === 'string' && value.indexOf('CT_CSS_SKIP_RULE') !== -1) {
-    return 'CT_CSS_SKIP_RULE'
-  }
+  // Custom
+  if (value.state === 3) {
+    if (!value.custom.trim()) {
+      return 'CT_CSS_SKIP_RULE'
+    }
 
-  if (
-    [value['top'], value['right'], value['bottom'], value['left']].reduce(
-      (isValueCompact, currentValue) =>
-        !isValueCompact
-          ? false
-          : !(currentValue !== 'auto' && currentValue.trim() !== ''),
-      true
-    )
-  ) {
-    return 'CT_CSS_SKIP_RULE'
+    return value.custom.trim()
   }
 
   let emptyValue = 0
@@ -21,48 +14,50 @@ export const prepareSpacingValueFor = (value, variableDescriptor) => {
     emptyValue = variableDescriptor.emptyValue
   }
 
-  if (emptyValue !== 0) {
-    let unit = 0
-
-    Object.values(value).forEach((singularValue) => {
-      if (
-        singularValue &&
-        parseFloat(singularValue).toString() !== singularValue
-      ) {
-        unit = singularValue
-          .toString()
-          .replace(parseFloat(singularValue).toString(), '')
+  let result = value.values.map((side) => {
+    if (side.value === '' || side.value === 'auto') {
+      return {
+        ...side,
+        value: emptyValue,
       }
-    })
+    }
 
-    emptyValue = `${emptyValue}${unit}`
+    return side
+  })
+
+  let shouldSkip = true
+  let unit = ''
+
+  result.forEach((side) => {
+    if (side.value !== emptyValue) {
+      shouldSkip = false
+    }
+
+    if (side.unit !== '') {
+      unit = side.unit
+    }
+  })
+
+  if (unit) {
+    result = result.map((side) => {
+      if (side.unit === '') {
+        return {
+          ...side,
+          unit,
+        }
+      }
+
+      return side
+    })
   }
 
-  const result = [
-    value['top'] === 'auto' ||
-    value['top'].trim() === '' ||
-    value['top'].toString() === '0'
-      ? emptyValue
-      : value['top'],
+  if (shouldSkip) {
+    return 'CT_CSS_SKIP_RULE'
+  }
 
-    value['right'] === 'auto' ||
-    value['right'].trim() === '' ||
-    value['right'].toString() === '0'
-      ? emptyValue
-      : value['right'],
-
-    value['bottom'] === 'auto' ||
-    value['bottom'].trim() === '' ||
-    value['bottom'].toString() === '0'
-      ? emptyValue
-      : value['bottom'],
-
-    value['left'] === 'auto' ||
-    value['left'].trim() === '' ||
-    value['left'].toString() === '0'
-      ? emptyValue
-      : value['left'],
-  ]
+  result = result.map((side) => {
+    return `${side.value}${side.unit}`
+  })
 
   if (
     result[0] === result[1] &&
