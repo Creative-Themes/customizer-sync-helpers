@@ -1,4 +1,8 @@
 export const prepareSpacingValueFor = (value, variableDescriptor) => {
+  if (value === 'CT_CSS_SKIP_RULE') {
+    return 'CT_CSS_SKIP_RULE'
+  }
+
   // Custom
   if (value.state === 3) {
     if (!value.custom.trim()) {
