@@ -25,7 +25,9 @@ const backportLegacySpacing = (legacy) => {
   }
 }
 
-export const prepareSpacingValueFor = (value, variableDescriptor) => {
+const transformSpacingValue = (value) => value
+
+export const prepareSpacingValueFor = (value, variableDescriptor, device) => {
   if (value === 'CT_CSS_SKIP_RULE') {
     return 'CT_CSS_SKIP_RULE'
   }
@@ -43,13 +45,20 @@ export const prepareSpacingValueFor = (value, variableDescriptor) => {
     }
   }
 
+  const valueTransformerFn =
+    variableDescriptor.transformSpacingValue || transformSpacingValue
+
   // Custom
   if (value.state === SPACING_STATE_CUSTOM) {
     if (!value.custom.trim()) {
       return 'CT_CSS_SKIP_RULE'
     }
 
-    return value.custom.trim()
+    return valueTransformerFn(
+      value.custom.trim(),
+      [value.custom.trim()],
+      device
+    )
   }
 
   let emptyValue = 0
@@ -108,12 +117,16 @@ export const prepareSpacingValueFor = (value, variableDescriptor) => {
     result[0] === result[2] &&
     result[0] === result[3]
   ) {
-    return result[0]
+    return valueTransformerFn(result[0], [result[0]], device)
   }
 
   if (result[0] === result[2] && result[1] === result[3]) {
-    return `${result[0]} ${result[3]}`
+    return valueTransformerFn(
+      `${result[0]} ${result[3]}`,
+      [result[0], result[3]],
+      device
+    )
   }
 
-  return result.join(' ')
+  return valueTransformerFn(result.join(' '), result, device)
 }

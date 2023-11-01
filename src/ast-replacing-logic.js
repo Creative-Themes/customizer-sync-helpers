@@ -153,6 +153,8 @@ export const replacingLogic = (args = {}) => {
     variableDescriptor: {},
     value: {},
     ast: {},
+    device: 'desktop',
+
     ...args,
   }
 
@@ -182,7 +184,11 @@ export const replacingLogic = (args = {}) => {
   }
 
   if ((args.variableDescriptor.type || '') === 'spacing') {
-    actualValue = prepareSpacingValueFor(args.value, args.variableDescriptor)
+    actualValue = prepareSpacingValueFor(
+      args.value,
+      args.variableDescriptor,
+      args.device
+    )
   }
 
   if ((args.variableDescriptor.type || '') === 'box-shadow') {

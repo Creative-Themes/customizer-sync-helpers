@@ -63,6 +63,7 @@ export const updateVariableInStyleTags = (args = {}) => {
             variableDescriptor,
             value: value.desktop,
             ast: currentAst,
+            device: 'desktop',
           })
 
           let tabletAst = desktopAst
@@ -110,6 +111,7 @@ export const updateVariableInStyleTags = (args = {}) => {
                   },
                   value: value.tablet,
                   ast: rule.rulelist,
+                  device: 'tablet',
                 }),
               }
             }),
@@ -160,6 +162,7 @@ export const updateVariableInStyleTags = (args = {}) => {
                   },
                   value: value.mobile,
                   ast: rule.rulelist,
+                  device: 'mobile',
                 }),
               }
             }),
