@@ -16,6 +16,9 @@ export const getStyleTagsWithAst = (args = {}) => {
   args = {
     cacheId: 'default',
     initialStyleTagsDescriptor: [],
+
+    initialStyleTags: [],
+
     ...args,
   }
 
@@ -25,7 +28,7 @@ export const getStyleTagsWithAst = (args = {}) => {
 
   const parser = new shadyCss.Parser()
 
-  let allStyles = []
+  let allStyles = [...args.initialStyleTags]
 
   const maybeStyle = document.querySelector('#ct-main-styles-inline-css')
 
