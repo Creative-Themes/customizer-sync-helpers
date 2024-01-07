@@ -31,7 +31,8 @@
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "^2.2.1",
     "rollup": "^2.75.6",
-    "rollup-plugin-peer-deps-external": "^2.2.4"
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "nanoid": "^2.0.0"
   },
   "files": ["dist"],
   "dependencies": {

@@ -1,4 +1,7 @@
-import { getStyleTagsWithAst } from './ast'
+import { getStyleTagsWithAst, persistNewAsts } from './ast'
+import { getUpdateAstsForStyleDescriptor } from './'
+
+import nanoid from 'nanoid'
 
 const style = document.createElement('style')
 
@@ -9,7 +12,50 @@ style.innerText = `:root {--theme-normal-container-max-width:1290px;--theme-narr
 test('it parses ast for our style tag', () => {
   expect(
     getStyleTagsWithAst({
+      cacheId: nanoid(),
       initialStyleTags: [style],
     })
   ).toHaveLength(1)
+})
+
+test('it adds previously non-existing in the style tag', () => {
+  const emptyStyle = document.createElement('style')
+
+  emptyStyle.innerText = ''
+
+  const cacheId = nanoid()
+
+  const commonArgs = {
+    cacheId,
+    initialStyleTags: [emptyStyle],
+  }
+
+  const astDescriptor = getStyleTagsWithAst(commonArgs)
+
+  const value = {
+    default: {
+      color: 'red',
+    },
+  }
+
+  // TODO: part to be refactored
+  const newAst = getUpdateAstsForStyleDescriptor({
+    variableDescriptor: {
+      selector: ':root',
+      variable: 'theme-text-color',
+      type: 'color',
+    },
+
+    value,
+    fullValue: { fontColor: value },
+
+    tabletMQ: '(max-width: 800px)',
+    mobileMQ: '(max-width: 370px)',
+
+    ...commonArgs,
+  })
+
+  persistNewAsts(cacheId, newAst)
+
+  expect(emptyStyle.innerText).toBe(':root{--theme-text-color:red;}')
 })
