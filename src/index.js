@@ -67,84 +67,73 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
         let tabletAst = desktopAst
 
         if (
-          !tabletAst.rules.find(
+          !tabletAst.rules.some(
             ({ type, parameters }) =>
               type === 'atRule' && parameters === args.tabletMQ
           )
         ) {
-          tabletAst = {
-            ...tabletAst,
-            rules: [
-              ...tabletAst.rules,
-              {
-                type: 'atRule',
-                name: 'media',
-                parameters: args.tabletMQ,
-                rulelist: {
-                  type: 'rulelist',
-                  rules: [],
-                },
-              },
-            ],
-          }
+          tabletAst.rules.push({
+            type: 'atRule',
+            name: 'media',
+            parameters: args.tabletMQ,
+            rulelist: {
+              type: 'rulelist',
+              rules: [],
+            },
+          })
         }
 
         tabletAst = {
           ...tabletAst,
-          rules: tabletAst.rules.map((rule) => {
-            if (rule.type !== 'atRule' || rule.parameters !== args.tabletMQ) {
-              return rule
-            }
-
-            return {
-              ...rule,
-              rulelist: replacingLogic({
-                variableDescriptor: {
-                  ...variableDescriptor,
-                  selector:
-                    variableDescriptor.selector ===
-                    '.edit-post-visual-editor__content-area > div'
-                      ? ':root'
-                      : variableDescriptor.selector,
-                },
-                value: value.tablet,
-                ast: rule.rulelist,
-                device: 'tablet',
-              }),
-            }
-          }),
         }
 
         let mobileAst = tabletAst
 
         if (
-          !mobileAst.rules.find(
+          !mobileAst.rules.some(
             ({ type, parameters }) =>
               type === 'atRule' && parameters === args.mobileMQ
           )
         ) {
-          mobileAst = {
-            ...mobileAst,
-            rules: [
-              ...mobileAst.rules,
-              {
-                type: 'atRule',
-                name: 'media',
-                parameters: args.mobileMQ,
-                rulelist: {
-                  type: 'rulelist',
-                  rules: [],
-                },
-              },
-            ],
-          }
+          mobileAst.rules.push({
+            type: 'atRule',
+            name: 'media',
+            parameters: args.mobileMQ,
+            rulelist: {
+              type: 'rulelist',
+              rules: [],
+            },
+          })
         }
 
         mobileAst = {
           ...mobileAst,
           rules: mobileAst.rules.map((rule) => {
-            if (rule.type !== 'atRule' || rule.parameters !== args.mobileMQ) {
+            if (
+              rule.type !== 'atRule' ||
+              (rule.parameters !== args.mobileMQ &&
+                rule.parameters !== args.tabletMQ)
+            ) {
               return rule
+            }
+
+            if (rule.parameters === args.mobileMQ) {
+              return {
+                ...rule,
+                rulelist: replacingLogic({
+                  variableDescriptor: {
+                    ...variableDescriptor,
+                    selector:
+                      variableDescriptor.selector ===
+                      '.edit-post-visual-editor__content-area > div'
+                        ? ':root'
+                        : variableDescriptor.selector,
+                  },
+                  ast: rule.rulelist,
+                  value: value.mobile,
+                  device: 'mobile',
+                }),
+              }
             }
 
             return {
@@ -158,9 +147,9 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
                       ? ':root'
                       : variableDescriptor.selector,
                 },
-                value: value.mobile,
                 ast: rule.rulelist,
-                device: 'mobile',
+                value: value.tablet,
+                device: 'tablet',
               }),
             }
           }),
