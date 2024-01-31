@@ -27,8 +27,7 @@ const replaceVariableInAst = (args = {}) => {
       ? variableDescriptor.variable()
       : variableDescriptor.variable
   }`
-
-  let hasSuchSelector = ast.rules.find(
+  let hasSuchSelector = ast.rules.some(
     ({ selector }) => selector === newSelector
   )
 
@@ -119,6 +118,8 @@ const replaceVariableInAst = (args = {}) => {
         },
       }
     })
+
+    return newAst
   }
 
   if (!hasSuchSelector && value.indexOf('CT_CSS_SKIP_RULE') === -1) {

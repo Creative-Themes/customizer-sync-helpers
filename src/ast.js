@@ -1,4 +1,5 @@
 import * as shadyCss from 'shady-css-parser'
+import { getAllDescriptors } from '.'
 
 const maybeGetPreviewerIframe = () => {
   return document.querySelector(
@@ -19,7 +20,19 @@ export const getStyleTagsWithAst = (args = {}) => {
 
     initialStyleTags: [],
 
+    parentArgs: {},
+
     ...args,
+  }
+
+  let allDescriptors = parentArgs.variableDescriptor
+
+  if (isFunction(allDescriptors)) {
+    allDescriptors = allDescriptors(parentArgs.value)
+  }
+
+  if (!Array.isArray(allDescriptors)) {
+    allDescriptors = [allDescriptors]
   }
 
   if (styleTagsCache[args.cacheId]) {
@@ -69,14 +82,14 @@ export const getStyleTagsWithAst = (args = {}) => {
           },
     }
 
-    return {
+    return getAllDescriptors(args, allDescriptors, {
       ...normalizedStyleDescriptor,
       ast: parser.parse(
         normalizedStyleDescriptor
           .readStyles()
           .replace(new RegExp('\n', 'g'), '')
       ),
-    }
+    })
   })
 
   return styleTagsCache[args.cacheId]
