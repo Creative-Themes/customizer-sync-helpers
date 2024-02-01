@@ -8,6 +8,17 @@ export const isFunction = (functionToCheck) =>
 const groupBy = (x, f) =>
   x.reduce((a, b, i) => ((a[f(b, i, x)] ||= []).push(b), a), {})
 
+const variableDescriptorToDeclaration = ({ variableDescriptor, value }) => {
+  return {
+    type: 'declaration',
+    name: variableDescriptor.variableName,
+    value: {
+      type: 'expression',
+      text: value,
+    },
+  }
+}
+
 const replaceVariableInAst = (args = {}) => {
   args = {
     variableDescriptor: {},
@@ -233,29 +244,134 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
         return ruleset
       }
 
+      processedSelectors.push(ruleset.selector)
+
       const allDescriptors = groupedBySelector[ruleset.selector]
 
-      let propertiesWithValue = allDescriptors.filter(
-        ({ value }) => !value.includes('CT_CSS_SKIP_RULE')
-      )
+      let processedVariables = []
 
-      let newRulelist = ruleset.rulelist
+      const propertiesWithValue = allDescriptors
+        .filter(({ value }) => !value.includes('CT_CSS_SKIP_RULE'))
+        .reduce((acc, variableDescriptor) => {
+          return {
+            ...acc,
+            [variableDescriptor.variableDescriptor.variableName]:
+              variableDescriptor,
+          }
+        }, {})
+
+      const propertiesWithoutValue = allDescriptors
+        .filter(({ value }) => value.includes('CT_CSS_SKIP_RULE'))
+        .reduce((acc, variableDescriptor) => {
+          return {
+            ...acc,
+            [variableDescriptor.variableDescriptor.variableName]:
+              variableDescriptor,
+          }
+        }, {})
+
+      let newRulelistRules = ruleset.rulelist.rules
         // Drop rules that are skipped
         .filter(({ type, name }) => {
           if (type !== 'declaration') {
             return true
           }
 
-          return !propertiesWithValue.find(
-            ({ variableDescriptor }) => variableDescriptor.variable === name
-          )
+          return !propertiesWithoutValue[name]
+        })
+        .map((declaration) => {
+          if (
+            declaration.type !== 'declaration' ||
+            !propertiesWithValue[declaration.name]
+          ) {
+            return declaration
+          }
+
+          processedVariables.push(declaration.name)
+
+          return {
+            ...declaration,
+            value: {
+              ...declaration.value,
+              text: propertiesWithValue[declaration.name].value,
+            },
+          }
         })
 
-      return ruleset
+      // Add new properties in existing selectors
+      if (
+        processedVariables.length !== Object.values(propertiesWithValue).length
+      ) {
+        newRulelistRules = [
+          ...newRulelistRules,
+          ...Object.values(propertiesWithValue)
+            .filter(
+              ({ variableDescriptor }) =>
+                !processedVariables.includes(variableDescriptor.variableName)
+            )
+            .map((variableDescriptorWithValue) => {
+              return variableDescriptorToDeclaration(
+                variableDescriptorWithValue
+              )
+            }),
+        ]
+      }
+
+      return {
+        ...ruleset,
+        rulelist: {
+          ...ruleset.rulelist,
+          rules: newRulelistRules,
+        },
+      }
     }),
   }
 
-  console.log('here groupedBySelector', groupedBySelector)
+  // Add new selectors
+  if (processedSelectors.length !== Object.keys(groupedBySelector).length) {
+    const selectorsWithActualValues = Object.values(groupedBySelector).filter(
+      (variableDescriptorsWithValue) => {
+        if (
+          processedSelectors.includes(
+            variableDescriptorsWithValue[0].variableDescriptor.selector
+          )
+        ) {
+          return false
+        }
 
-  return args.ast
+        if (
+          !variableDescriptorsWithValue.find(
+            ({ value }) => !value.includes('CT_CSS_SKIP_RULE')
+          )
+        ) {
+          return false
+        }
+
+        return true
+      }
+    )
+
+    newAst = {
+      ...newAst,
+      rules: [
+        ...newAst.rules,
+
+        ...selectorsWithActualValues.map((variableDescriptorsWithValue) => {
+          return {
+            type: 'ruleset',
+            selector:
+              variableDescriptorsWithValue[0].variableDescriptor.selector,
+            rulelist: {
+              type: 'rulelist',
+              rules: variableDescriptorsWithValue.map(
+                variableDescriptorToDeclaration
+              ),
+            },
+          }
+        }),
+      ],
+    }
+  }
+
+  return newAst
 }

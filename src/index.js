@@ -61,8 +61,6 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
         })
       })
 
-    console.log('here prepared', prepareVariableDescriptorsForUpdate('desktop'))
-
     return {
       ...styleDescriptor,
       ast: replaceVariableDescriptorsInAst({

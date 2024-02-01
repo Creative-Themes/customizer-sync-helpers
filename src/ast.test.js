@@ -354,6 +354,7 @@ describe('getStyleTagsWithAst', () => {
     )
   })
 })
+*/
 
 test('it adds previously non-existing in the style tag', () => {
   const emptyStyle = document.createElement('style')
@@ -367,7 +368,6 @@ test('it adds previously non-existing in the style tag', () => {
   }
 
   const astDescriptor = getStyleTagsWithAst(commonArgs)
-
 
   const value = {
     default: {
@@ -396,7 +396,6 @@ test('it adds previously non-existing in the style tag', () => {
 
   expect(emptyStyle.innerText).toBe(':root{--theme-text-color:red;}')
 })
-*/
 
 test('it adds previously non-existing in the style tag with multiple variable descriptors', () => {
   const emptyStyle = document.createElement('style')
@@ -412,8 +411,6 @@ test('it adds previously non-existing in the style tag with multiple variable de
   }
 
   const astDescriptor = getStyleTagsWithAst(commonArgs)
-
-  console.log('here', { ast: JSON.stringify(astDescriptor[0].ast) })
 
   const value = {
     default: {
