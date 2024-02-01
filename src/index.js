@@ -73,51 +73,56 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
 
     let isResponsive = allDescriptors.find(({ responsive }) => !!responsive)
 
-    if (isResponsive) {
-      if (
-        !updatedAst.rules.find(
-          ({ type, parameters }) =>
-            type === 'atRule' && parameters === args.tabletMQ
-        )
-      ) {
-        updatedAst = {
-          ...updatedAst,
-          rules: [
-            ...updatedAst.rules,
-            {
-              type: 'atRule',
-              name: 'media',
-              parameters: args.tabletMQ,
-              rulelist: {
-                type: 'rulelist',
-                rules: [],
-              },
-            },
-          ],
-        }
+    if (!isResponsive) {
+      return {
+        ...styleDescriptor,
+        ast: updatedAst,
       }
+    }
 
-      if (
-        !updatedAst.rules.find(
-          ({ type, parameters }) =>
-            type === 'atRule' && parameters === args.mobileMQ
-        )
-      ) {
-        updatedAst = {
-          ...updatedAst,
-          rules: [
-            ...updatedAst.rules,
-            {
-              type: 'atRule',
-              name: 'media',
-              parameters: args.mobileMQ,
-              rulelist: {
-                type: 'rulelist',
-                rules: [],
-              },
+    if (
+      !updatedAst.rules.find(
+        ({ type, parameters }) =>
+          type === 'atRule' && parameters === args.tabletMQ
+      )
+    ) {
+      updatedAst = {
+        ...updatedAst,
+        rules: [
+          ...updatedAst.rules,
+          {
+            type: 'atRule',
+            name: 'media',
+            parameters: args.tabletMQ,
+            rulelist: {
+              type: 'rulelist',
+              rules: [],
             },
-          ],
-        }
+          },
+        ],
+      }
+    }
+
+    if (
+      !updatedAst.rules.find(
+        ({ type, parameters }) =>
+          type === 'atRule' && parameters === args.mobileMQ
+      )
+    ) {
+      updatedAst = {
+        ...updatedAst,
+        rules: [
+          ...updatedAst.rules,
+          {
+            type: 'atRule',
+            name: 'media',
+            parameters: args.mobileMQ,
+            rulelist: {
+              type: 'rulelist',
+              rules: [],
+            },
+          },
+        ],
       }
     }
 
