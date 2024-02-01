@@ -59,7 +59,7 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
 
         return prepareVariableDescriptor({
           variableDescriptor,
-          value,
+          value: !!variableDescriptor.responsive ? value[device] : value,
           device,
         })
       })
