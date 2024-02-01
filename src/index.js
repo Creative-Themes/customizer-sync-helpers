@@ -146,7 +146,7 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
         if (rule.parameters === args.mobileMQ) {
           rulelist = replaceVariableDescriptorsInAst({
             variableDescriptorsWithValue:
-              prepareVariableDescriptorsForUpdate('tablet'),
+              prepareVariableDescriptorsForUpdate('mobile'),
             ast: rulelist,
           })
         }
