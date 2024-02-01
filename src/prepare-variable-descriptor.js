@@ -1,6 +1,8 @@
 import { prepareSpacingValueFor } from './types/spacing'
 import { prepareBoxShadowValueFor } from './types/boxShadow'
 
+import { isFunction } from './ast-replacing-logic'
+
 export const prepareVariableDescriptor = (args = {}) => {
   args = {
     variableDescriptor: {},
@@ -47,8 +49,24 @@ export const prepareVariableDescriptor = (args = {}) => {
     actualValue = prepareBoxShadowValueFor(args.value, args.variableDescriptor)
   }
 
+  let variablePrefix = '--'
+
+  if (args.variableDescriptor.variableType === 'property') {
+    variablePrefix = ''
+  }
+
+  let variableName = `${variablePrefix}${
+    isFunction(args.variableDescriptor.variable)
+      ? args.variableDescriptor.variable()
+      : args.variableDescriptor.variable
+  }`
+
   return {
-    variableDescriptor: args.variableDescriptor,
+    variableDescriptor: {
+      ...args.variableDescriptor,
+      selector: args.variableDescriptor.selector || ':root',
+      variableName,
+    },
     value: `${actualValue}${args.variableDescriptor.unit || ''}${
       args.variableDescriptor.important ? ' !important' : ''
     }`,

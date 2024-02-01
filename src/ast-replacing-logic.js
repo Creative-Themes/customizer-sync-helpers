@@ -218,8 +218,42 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
 
   const groupedBySelector = groupBy(
     args.variableDescriptorsWithValue,
-    ({ variableDescriptor }) => variableDescriptor.selector || ':root'
+    ({ variableDescriptor }) => variableDescriptor.selector
   )
+
+  let processedSelectors = []
+
+  let newAst = {}
+
+  newAst = {
+    ...args.ast,
+
+    rules: args.ast.rules.map((ruleset) => {
+      if (!ruleset.selector || !groupedBySelector[ruleset.selector]) {
+        return ruleset
+      }
+
+      const allDescriptors = groupedBySelector[ruleset.selector]
+
+      let propertiesWithValue = allDescriptors.filter(
+        ({ value }) => !value.includes('CT_CSS_SKIP_RULE')
+      )
+
+      let newRulelist = ruleset.rulelist
+        // Drop rules that are skipped
+        .filter(({ type, name }) => {
+          if (type !== 'declaration') {
+            return true
+          }
+
+          return !propertiesWithValue.find(
+            ({ variableDescriptor }) => variableDescriptor.variable === name
+          )
+        })
+
+      return ruleset
+    }),
+  }
 
   console.log('here groupedBySelector', groupedBySelector)
 
