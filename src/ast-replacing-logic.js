@@ -4,6 +4,10 @@ import { prepareBoxShadowValueFor } from './types/boxShadow'
 export const isFunction = (functionToCheck) =>
   functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
 
+// https://stackoverflow.com/a/64489535/3220977
+const groupBy = (x, f) =>
+  x.reduce((a, b, i) => ((a[f(b, i, x)] ||= []).push(b), a), {})
+
 const replaceVariableInAst = (args = {}) => {
   args = {
     variableDescriptor: {},
@@ -202,4 +206,22 @@ export const replacingLogic = (args = {}) => {
     }`,
     ast: args.ast,
   })
+}
+
+export const replaceVariableDescriptorsInAst = (args = {}) => {
+  args = {
+    variableDescriptorsWithValue: [],
+    ast: {},
+
+    ...args,
+  }
+
+  const groupedBySelector = groupBy(
+    args.variableDescriptorsWithValue,
+    ({ variableDescriptor }) => variableDescriptor.selector || ':root'
+  )
+
+  console.log('here groupedBySelector', groupedBySelector)
+
+  return args.ast
 }

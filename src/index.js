@@ -1,6 +1,12 @@
 import { maybePromoteScalarValueIntoResponsive } from './promote-into-responsive'
 import { getStyleTagsWithAst, persistNewAsts } from './ast'
-import { isFunction, replacingLogic } from './ast-replacing-logic'
+import {
+  replaceVariableDescriptorsInAst,
+  isFunction,
+  replacingLogic,
+} from './ast-replacing-logic'
+
+import { prepareVariableDescriptor } from './prepare-variable-descriptor'
 
 export const getUpdateAstsForStyleDescriptor = (args = {}) => {
   args = {
@@ -31,6 +37,41 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
     cacheId: args['cacheId'],
     initialStyleTagsDescriptor: args.initialStyleTagsDescriptor,
   }).map((styleDescriptor) => {
+    const prepareVariableDescriptorsForUpdate = (device) =>
+      allDescriptors.map((variableDescriptor) => {
+        let value = variableDescriptor.fullValue ? args.fullValue : args.value
+
+        value = variableDescriptor.extractValue
+          ? variableDescriptor.extractValue(value)
+          : value
+
+        if (variableDescriptor.whenDone) {
+          variableDescriptor.whenDone(value, args.value)
+        }
+
+        value = maybePromoteScalarValueIntoResponsive(
+          value,
+          !!variableDescriptor.responsive
+        )
+
+        return prepareVariableDescriptor({
+          variableDescriptor,
+          value,
+          device,
+        })
+      })
+
+    console.log('here prepared', prepareVariableDescriptorsForUpdate('desktop'))
+
+    return {
+      ...styleDescriptor,
+      ast: replaceVariableDescriptorsInAst({
+        variableDescriptorsWithValue:
+          prepareVariableDescriptorsForUpdate('desktop'),
+        ast: styleDescriptor.ast,
+      }),
+    }
+
     return {
       ...styleDescriptor,
       ast: allDescriptors.reduce((currentAst, variableDescriptor) => {
