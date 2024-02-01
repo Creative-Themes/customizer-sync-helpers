@@ -82,6 +82,9 @@ export const getStyleTagsWithAst = (args = {}) => {
   return styleTagsCache[args.cacheId]
 }
 
+// TODO: Maybe don't re-order rules on every persist.
+// Move the re-order on getStyleTagsWithAst() and do it at the parsing phase,
+// not when persisting.
 export const persistNewAsts = (cacheId, styleTags) => {
   styleTagsCache[cacheId] = styleTags
 
