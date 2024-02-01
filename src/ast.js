@@ -69,6 +69,15 @@ export const getStyleTagsWithAst = (args = {}) => {
           },
     }
 
+    const newStyleDescriptor = {
+      ...normalizedStyleDescriptor,
+      ast: parser.parse(
+        normalizedStyleDescriptor
+          .readStyles()
+          .replace(new RegExp('\n', 'g'), '')
+      ),
+    }
+
     return {
       ...normalizedStyleDescriptor,
       ast: parser.parse(
@@ -90,7 +99,7 @@ export const persistNewAsts = (cacheId, styleTags) => {
 
   const stringifier = new shadyCss.Stringifier()
 
-  styleTagsCache[cacheId].map((styleDescriptor) => {
+  styleTagsCache[cacheId].forEach((styleDescriptor) => {
     const groupedRules = styleDescriptor.ast.rules.reduce(
       (result, rule) => {
         if (rule.type === 'atRule' && rule.name === 'media') {

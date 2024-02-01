@@ -45,5 +45,5 @@ export const handleVariablesFor = (variables) =>
       allVariables = [allVariables]
     }
 
-    allVariables.map((d) => handleSingleVariableFor(d, e()))
+    allVariables.forEach((d) => handleSingleVariableFor(d, e()))
   })

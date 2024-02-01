@@ -50,7 +50,10 @@ const replaceVariableInAst = (args = {}) => {
     },
   }
 
-  let newAst = JSON.parse(JSON.stringify(ast))
+  let newAst =
+    typeof structuredClone !== 'undefined'
+      ? structuredClone(ast)
+      : JSON.parse(JSON.stringify(ast))
 
   if (hasSuchSelector) {
     newAst.rules = newAst.rules.map((rule) => {
