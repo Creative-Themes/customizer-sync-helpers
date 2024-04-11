@@ -167,9 +167,9 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
               variableDescriptorsWithValue[0].variableDescriptor.selector,
             rulelist: {
               type: 'rulelist',
-              rules: variableDescriptorsWithValue.map(
-                variableDescriptorToDeclaration
-              ),
+              rules: variableDescriptorsWithValue
+                .filter(({ value }) => !value.includes('CT_CSS_SKIP_RULE'))
+                .map(variableDescriptorToDeclaration),
             },
           }
         }),

@@ -106,8 +106,6 @@ test('it adds previously non-existing in the style tag with multiple variable de
 test('it drops selectors', () => {
   const emptyStyle = document.createElement('style')
 
-  emptyStyle.innerText = ''
-
   emptyStyle.innerText = ':root{--theme-text-color:blue;}'
 
   const cacheId = nanoid()
@@ -146,4 +144,56 @@ test('it drops selectors', () => {
   persistNewAsts(cacheId, newAst)
 
   expect(emptyStyle.innerText).toBe(':root{}')
+})
+
+test('it correctly outputs stuff', () => {
+  const emptyStyle = document.createElement('style')
+
+  emptyStyle.innerText = ''
+
+  const cacheId = nanoid()
+  const commonArgs = {
+    cacheId,
+    initialStyleTags: [emptyStyle],
+  }
+
+  const astDescriptor = getStyleTagsWithAst(commonArgs)
+
+  const value = {
+    default: {
+      color: '#9f2020',
+    },
+    hover: {
+      color: 'CT_CSS_SKIP_RULEDEFAULT',
+    },
+  }
+
+  const newAst = getUpdateAstsForStyleDescriptor({
+    variableDescriptor: [
+      {
+        selector: '.woocommerce-product-gallery',
+        variable: 'flexy-nav-background-color',
+        type: 'color:default',
+      },
+      {
+        selector: '.woocommerce-product-gallery',
+        variable: 'flexy-nav-background-hover-color',
+        type: 'color:hover',
+      },
+    ],
+
+    value,
+    fullValue: { fontColor: value },
+
+    tabletMQ: '(max-width: 800px)',
+    mobileMQ: '(max-width: 370px)',
+
+    ...commonArgs,
+  })
+
+  persistNewAsts(cacheId, newAst)
+
+  expect(emptyStyle.innerText).toBe(
+    '.woocommerce-product-gallery{--flexy-nav-background-color:#9f2020;}'
+  )
 })
