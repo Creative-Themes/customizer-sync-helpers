@@ -183,4 +183,4 @@ export const updateVariableInStyleTags = (args = {}) => {
   persistNewAsts(args['cacheId'], getUpdateAstsForStyleDescriptor(args))
 }
 
-export { clearAstCache } from './ast'
+export { clearAstCache, getStyleTagsWithAst, persistNewAsts } from './ast'

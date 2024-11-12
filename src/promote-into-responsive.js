@@ -20,6 +20,6 @@ export const maybePromoteScalarValueIntoResponsive = (
   return {
     desktop: value,
     tablet: value,
-    mobile: value
+    mobile: value,
   }
 }
