@@ -197,3 +197,51 @@ test('it correctly outputs stuff', () => {
     '.woocommerce-product-gallery{--flexy-nav-background-color:#9f2020;}'
   )
 })
+
+test('it implements responsive selector', () => {
+  const emptyStyle = document.createElement('style')
+
+  emptyStyle.innerText = ''
+
+  const cacheId = nanoid()
+  const commonArgs = {
+    cacheId,
+    initialStyleTags: [emptyStyle],
+  }
+
+  const astDescriptor = getStyleTagsWithAst(commonArgs)
+
+  const value = {
+    default: {
+      color: 'red',
+    },
+  }
+
+  // TODO: part to be refactored
+  const newAst = getUpdateAstsForStyleDescriptor({
+    variableDescriptor: {
+      selector: {
+        desktop: ':rootdesktop',
+        tablet: ':roottablet',
+        mobile: ':rootmobile',
+      },
+      variable: 'theme-text-color',
+      type: 'color',
+      responsive: true,
+    },
+
+    value,
+    fullValue: { fontColor: value },
+
+    tabletMQ: '(max-width: 800px)',
+    mobileMQ: '(max-width: 370px)',
+
+    ...commonArgs,
+  })
+
+  persistNewAsts(cacheId, newAst)
+
+  expect(emptyStyle.innerText).toBe(
+    ':rootdesktop{--theme-text-color:red;}@media (max-width: 800px){:roottablet{--theme-text-color:red;}}@media (max-width: 370px){:rootmobile{--theme-text-color:red;}}'
+  )
+})

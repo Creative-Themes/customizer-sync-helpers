@@ -19,10 +19,20 @@ const variableDescriptorToDeclaration = ({ variableDescriptor, value }) => {
   }
 }
 
+const getSelector = (variableDescriptor, device) => {
+  if (variableDescriptor.selector && variableDescriptor.selector.desktop) {
+    return variableDescriptor.selector[device]
+  }
+
+  return variableDescriptor.selector || `:root`
+}
+
 export const replaceVariableDescriptorsInAst = (args = {}) => {
   args = {
     variableDescriptorsWithValue: [],
     ast: {},
+
+    device: 'desktop',
 
     ...args,
   }
@@ -33,7 +43,7 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
 
   const groupedBySelector = groupBy(
     args.variableDescriptorsWithValue,
-    ({ variableDescriptor }) => variableDescriptor.selector
+    ({ variableDescriptor }) => getSelector(variableDescriptor, args.device)
   )
 
   let processedSelectors = []
@@ -137,7 +147,10 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
       (variableDescriptorsWithValue) => {
         if (
           processedSelectors.includes(
-            variableDescriptorsWithValue[0].variableDescriptor.selector
+            getSelector(
+              variableDescriptorsWithValue[0].variableDescriptor,
+              args.device
+            )
           )
         ) {
           return false
@@ -163,8 +176,10 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
         ...selectorsWithActualValues.map((variableDescriptorsWithValue) => {
           return {
             type: 'ruleset',
-            selector:
-              variableDescriptorsWithValue[0].variableDescriptor.selector,
+            selector: getSelector(
+              variableDescriptorsWithValue[0].variableDescriptor,
+              args.device
+            ),
             rulelist: {
               type: 'rulelist',
               rules: variableDescriptorsWithValue

@@ -69,6 +69,8 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
       variableDescriptorsWithValue:
         prepareVariableDescriptorsForUpdate('desktop'),
       ast: styleDescriptor.ast,
+
+      device: 'desktop',
     })
 
     let isResponsive = allDescriptors.find(({ responsive }) => !!responsive)
@@ -140,6 +142,8 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
             variableDescriptorsWithValue:
               prepareVariableDescriptorsForUpdate('tablet'),
             ast: rulelist,
+
+            device: 'tablet',
           })
         }
 
@@ -148,6 +152,8 @@ export const getUpdateAstsForStyleDescriptor = (args = {}) => {
             variableDescriptorsWithValue:
               prepareVariableDescriptorsForUpdate('mobile'),
             ast: rulelist,
+
+            device: 'mobile',
           })
         }
 
