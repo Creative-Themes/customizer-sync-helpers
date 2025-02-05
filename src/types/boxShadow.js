@@ -1,5 +1,5 @@
 export const prepareBoxShadowValueFor = (value, { forcedOutput = false }) => {
-  if (value === 'CT_CSS_SKIP_RULE') {
+  if (value === 'CT_CSS_SKIP_RULE' || value.inherit) {
     return 'CT_CSS_SKIP_RULE'
   }
 
