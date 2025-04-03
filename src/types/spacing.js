@@ -63,7 +63,7 @@ export const prepareSpacingValueFor = (value, variableDescriptor, device) => {
 
   let emptyValue = 0
 
-  if (variableDescriptor.emptyValue) {
+  if (Object.keys(variableDescriptor).includes('emptyValue')) {
     emptyValue = variableDescriptor.emptyValue
   }
 
