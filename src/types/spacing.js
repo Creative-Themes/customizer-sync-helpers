@@ -71,7 +71,7 @@ export const prepareSpacingValueFor = (value, variableDescriptor, device) => {
     if (side.value === '' || side.value === 'auto') {
       return {
         ...side,
-        value: emptyValue,
+        value: value.state === SPACING_STATE_LINKED ? emptyValue : 0,
       }
     }
 
