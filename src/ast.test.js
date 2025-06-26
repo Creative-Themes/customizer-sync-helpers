@@ -427,3 +427,37 @@ test('it removes all existing selectors and keeps only the new one', () => {
 
   expect(style.innerText).toBe(':page{--space:20px;}')
 })
+
+test('drops newly added selector when it matches dropSelectors (should NOT)', () => {
+  const style = document.createElement('style')
+
+  style.innerText =
+    ':root-similar{--theme-color:blue;}:root-not-similar{--theme-color:green;}'
+
+  const cacheId = nanoid()
+  const commonArgs = {
+    cacheId,
+    initialStyleTags: [style],
+  }
+
+  const astDescriptor = getStyleTagsWithAst(commonArgs)
+
+  const newAst = getUpdateAstsForStyleDescriptor({
+    variableDescriptor: {
+      selector: ':root',
+      dropSelectors: [':root'], // matches the new selector
+      variable: 'theme-color',
+      type: 'color',
+    },
+    value: { default: { color: 'purple' } },
+    fullValue: {},
+    tabletMQ: '',
+    mobileMQ: '',
+    ...commonArgs,
+  })
+
+  persistNewAsts(cacheId, newAst)
+
+  // This expectation will fail — :root gets dropped
+  expect(style.innerText).toBe(':root{--theme-color:purple;}')
+})

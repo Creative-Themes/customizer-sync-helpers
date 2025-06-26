@@ -37,8 +37,29 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
     ...args,
   }
 
+  let receivedAst = args.ast
+
+  const allDropSelectors = args.variableDescriptorsWithValue.flatMap(
+    ({ variableDescriptor }) => variableDescriptor.dropSelectors || []
+  )
+
+  if (allDropSelectors.length > 0 && Array.isArray(receivedAst.rules)) {
+    const originalSelectors = new Set(receivedAst.rules.map((r) => r.selector))
+
+    receivedAst = {
+      ...receivedAst,
+      rules: receivedAst.rules.filter((ruleset) => {
+        const wasInOriginalAst = originalSelectors.has(ruleset.selector)
+        const matchesDropSelector = allDropSelectors.some((partial) =>
+          ruleset.selector.includes(partial)
+        )
+        return !(wasInOriginalAst && matchesDropSelector)
+      }),
+    }
+  }
+
   if (args.variableDescriptorsWithValue.length === 0) {
-    return args.ast
+    return receivedAst
   }
 
   const groupedBySelector = groupBy(
@@ -51,9 +72,9 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
   let newAst = {}
 
   newAst = {
-    ...args.ast,
+    ...receivedAst,
 
-    rules: args.ast.rules.map((ruleset) => {
+    rules: receivedAst.rules.map((ruleset) => {
       if (!ruleset.selector || !groupedBySelector[ruleset.selector]) {
         return ruleset
       }
@@ -189,22 +210,6 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
           }
         }),
       ],
-    }
-  }
-
-  const allDropSelectors = args.variableDescriptorsWithValue.flatMap(
-    ({ variableDescriptor }) => variableDescriptor.dropSelectors || []
-  )
-
-  if (allDropSelectors.length > 0) {
-    newAst = {
-      ...newAst,
-      rules: newAst.rules.filter(
-        (ruleset) =>
-          !allDropSelectors.some((partial) =>
-            ruleset.selector.includes(partial)
-          )
-      ),
     }
   }
 
