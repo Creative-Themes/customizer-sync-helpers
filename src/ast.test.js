@@ -461,3 +461,34 @@ test('drops newly added selector when it matches dropSelectors (should NOT)', ()
   // This expectation will fail — :root gets dropped
   expect(style.innerText).toBe(':root{--theme-color:purple;}')
 })
+
+test('adds variable to :root safely when style tag contains a comment', () => {
+  const style = document.createElement('style')
+
+  style.innerText = '/* test comment */'
+
+  const cacheId = nanoid()
+  const commonArgs = {
+    cacheId,
+    initialStyleTags: [style],
+  }
+
+  const astDescriptor = getStyleTagsWithAst(commonArgs)
+
+  const newAst = getUpdateAstsForStyleDescriptor({
+    variableDescriptor: {
+      selector: ':root',
+      variable: 'theme-color',
+      type: 'color',
+    },
+    value: { default: { color: 'blue' } },
+    fullValue: {},
+    tabletMQ: '',
+    mobileMQ: '',
+    ...commonArgs,
+  })
+
+  persistNewAsts(cacheId, newAst)
+
+  expect(style.innerText).toBe('/* test comment */:root{--theme-color:blue;}')
+})

@@ -50,9 +50,11 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
       ...receivedAst,
       rules: receivedAst.rules.filter((ruleset) => {
         const wasInOriginalAst = originalSelectors.has(ruleset.selector)
-        const matchesDropSelector = allDropSelectors.some((partial) =>
-          ruleset.selector.includes(partial)
-        )
+
+        const matchesDropSelector =
+          typeof ruleset.selector === 'string' &&
+          allDropSelectors.some((partial) => ruleset.selector.includes(partial))
+
         return !(wasInOriginalAst && matchesDropSelector)
       }),
     }
