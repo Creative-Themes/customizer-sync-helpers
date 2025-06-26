@@ -192,5 +192,21 @@ export const replaceVariableDescriptorsInAst = (args = {}) => {
     }
   }
 
+  const allDropSelectors = args.variableDescriptorsWithValue.flatMap(
+    ({ variableDescriptor }) => variableDescriptor.dropSelectors || []
+  )
+
+  if (allDropSelectors.length > 0) {
+    newAst = {
+      ...newAst,
+      rules: newAst.rules.filter(
+        (ruleset) =>
+          !allDropSelectors.some((partial) =>
+            ruleset.selector.includes(partial)
+          )
+      ),
+    }
+  }
+
   return newAst
 }
