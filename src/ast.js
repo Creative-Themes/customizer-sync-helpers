@@ -1,4 +1,4 @@
-import * as shadyCss from 'shady-css-parser'
+import { Parser, Stringifier } from './css-parser'
 
 const maybeGetPreviewerIframe = () => {
   return document.querySelector(
@@ -26,7 +26,7 @@ export const getStyleTagsWithAst = (args = {}) => {
     return styleTagsCache[args.cacheId]
   }
 
-  const parser = new shadyCss.Parser()
+  const parser = new Parser()
 
   let allStyles = [...args.initialStyleTags]
 
@@ -88,7 +88,7 @@ export const getStyleTagsWithAst = (args = {}) => {
 export const persistNewAsts = (cacheId, styleTags) => {
   styleTagsCache[cacheId] = styleTags
 
-  const stringifier = new shadyCss.Stringifier()
+  const stringifier = new Stringifier()
 
   styleTagsCache[cacheId].map((styleDescriptor) => {
     const groupedRules = styleDescriptor.ast.rules.reduce(

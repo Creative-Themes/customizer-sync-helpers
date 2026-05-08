@@ -1,7 +1,7 @@
 import { clearAstCache, getStyleTagsWithAst, persistNewAsts } from './ast'
 import { getUpdateAstsForStyleDescriptor } from './'
 
-import nanoid from 'nanoid'
+const nanoid = () => Math.random().toString(36).slice(2)
 
 test('it adds previously non-existing in the style tag', () => {
   const emptyStyle = document.createElement('style')
