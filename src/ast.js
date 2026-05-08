@@ -1,4 +1,4 @@
-import { Parser, Stringifier } from './css-parser'
+import { Parser, Stringifier } from '@creative-themes/css-parser'
 
 const maybeGetPreviewerIframe = () => {
   return document.querySelector(
